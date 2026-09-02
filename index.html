@@ -367,6 +367,10 @@
   .rank-text{flex:1;font-size:20px;line-height:1.5;color:var(--ink);}
   .rank-text b{font-size:20px;font-weight:700;color:var(--brand-dark);}
   .rank-text .strat-desc{font-size:17px;color:var(--ink-soft);margin-top:4px;line-height:1.5;font-weight:400;}
+  .climate-note{margin-top:8px;padding:8px 12px;background:#EDF6EF;border-left:3px solid var(--success);border-radius:6px;font-size:15px;color:#1E5F42;font-style:italic;line-height:1.5;}
+  .choice.locked{opacity:0.55;cursor:not-allowed;}
+  .choice.locked:hover{border-color:var(--line);background:var(--card);}
+  .choice.selected.locked{opacity:1;}
   .rank-text b{color:var(--brand-dark);font-weight:600;}
   .rank-select{
     flex:0 0 auto;
@@ -585,13 +589,18 @@
     <div class="card">
       <span class="q-label">คำถาม 1.2</span>
       <h3 class="q-title">ปัญหาเรื่องน้ำที่สำคัญที่สุดในปัจจุบันคืออะไร?</h3>
-      <p class="q-hint">พิมพ์สั้นๆ 1 คำ เช่น น้ำท่วม น้ำแล้ง น้ำเค็ม (ส่งได้หลายครั้ง)</p>
-      <div class="field" style="display:flex;gap:8px;">
-        <input type="text" id="word-input" maxlength="30" placeholder="พิมพ์ปัญหาน้ำในพื้นที่ของท่าน..." onkeydown="if(event.key==='Enter')submitWord()">
-        <button class="btn" onclick="submitWord()">ส่ง</button>
+      <p class="q-hint">เลือก 1 คำที่ตรงกับพื้นที่ของท่านมากที่สุด</p>
+      <div class="choices grid-2" id="word-choices">
+        <button class="choice" data-word="น้ำท่วม" onclick="pickWord(this)"><span class="icon"></span><span class="text">น้ำท่วม</span></button>
+        <button class="choice" data-word="น้ำแล้ง" onclick="pickWord(this)"><span class="icon"></span><span class="text">น้ำแล้ง</span></button>
+        <button class="choice" data-word="น้ำเค็ม" onclick="pickWord(this)"><span class="icon"></span><span class="text">น้ำเค็ม</span></button>
+        <button class="choice" data-word="น้ำเสีย" onclick="pickWord(this)"><span class="icon"></span><span class="text">น้ำเสีย</span></button>
+        <button class="choice" data-word="น้ำไม่พอ" onclick="pickWord(this)"><span class="icon"></span><span class="text">น้ำไม่พอ</span></button>
+        <button class="choice" data-word="ประปา" onclick="pickWord(this)"><span class="icon"></span><span class="text">ประปา</span></button>
+        <button class="choice" data-word="แย่งน้ำ" onclick="pickWord(this)"><span class="icon"></span><span class="text">แย่งน้ำ</span></button>
       </div>
-      <div class="field">
-        <label class="field-label">บริเวณ (ไม่บังคับ)</label>
+      <div class="field" style="margin-top:12px;">
+        <label class="field-label">บริเวณ</label>
         <input type="text" id="area-input" placeholder="หมู่/ตำบล/อำเภอ/จังหวัด">
       </div>
       <div class="cloud" id="cloud">
@@ -603,13 +612,15 @@
     <div class="card">
       <span class="q-label">คำถาม 1.3</span>
       <h3 class="q-title">ประเด็นที่ท่านกังวลมากที่สุดเกี่ยวกับอนาคตของลุ่มน้ำ</h3>
-      <p class="q-hint">เลือกได้หลายข้อ</p>
-      <div class="choices">
-        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">น้ำกินน้ำใช้</span></button>
-        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">น้ำเพื่อการเกษตรและอาชีพ</span></button>
-        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">น้ำท่วมและภัยแล้ง</span></button>
-        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">ทรัพยากรธรรมชาติและสิ่งแวดล้อม</span></button>
-        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">การบริหารจัดการน้ำ</span></button>
+      <p class="q-hint">เลือก 1 ข้อที่กังวลที่สุด</p>
+      <div class="choices" id="concern-choices">
+        <button class="choice" onclick="pickConcern(this)"><span class="icon"></span><span class="text">น้ำกินน้ำใช้</span></button>
+        <button class="choice" onclick="pickConcern(this)"><span class="icon"></span><span class="text">น้ำเพื่อการเกษตรและอาชีพ</span></button>
+        <button class="choice" onclick="pickConcern(this)"><span class="icon"></span><span class="text">น้ำท่วมและภัยแล้ง</span></button>
+        <button class="choice" onclick="pickConcern(this)"><span class="icon"></span><span class="text">คุณภาพน้ำ น้ำเสีย</span></button>
+        <button class="choice" onclick="pickConcern(this)"><span class="icon"></span><span class="text">น้ำเค็มรุกล้ำ น้ำกร่อย</span></button>
+        <button class="choice" onclick="pickConcern(this)"><span class="icon"></span><span class="text">ทรัพยากรธรรมชาติและสิ่งแวดล้อม</span></button>
+        <button class="choice" onclick="pickConcern(this)"><span class="icon"></span><span class="text">การบริหารจัดการน้ำ</span></button>
       </div>
     </div>
 
@@ -625,10 +636,10 @@
         <p>ระหว่างใครกับใคร? (เลือกได้หลายข้อ)</p>
         <label class="sub-check"><input type="checkbox"><span><b>ประชาชน – ประชาชน</b><span class="desc">เช่น หมู่บ้านต้นน้ำ vs ปลายน้ำ แย่งน้ำ</span></span></label>
         <label class="sub-check"><input type="checkbox"><span><b>ประชาชน – ภาครัฐ</b><span class="desc">เช่น ชาวบ้านค้านโครงการรัฐ</span></span></label>
-        <label class="sub-check"><input type="checkbox"><span><b>ประชาชน – ภาคเอกชน</b><span class="desc">เช่น ชาวบ้าน vs โรงงาน</span></span></label>
+        <label class="sub-check"><input type="checkbox"><span><b>ประชาชน – ภาคเอกชน</b><span class="desc">เช่น ชาวบ้าน vs โรงงานอุตสาหกรรม</span></span></label>
         <label class="sub-check"><input type="checkbox"><span><b>ภาครัฐ – ภาครัฐ</b><span class="desc">เช่น 2 หน่วยงานรัฐทำงานทับซ้อน</span></span></label>
         <label class="sub-check"><input type="checkbox"><span><b>ภาครัฐ – ภาคเอกชน</b><span class="desc">เช่น รัฐควบคุมบริษัทใช้น้ำ</span></span></label>
-        <label class="sub-check"><input type="checkbox"><span><b>ภาคเอกชน – ภาคเอกชน</b><span class="desc">เช่น 2 โรงงานแย่งน้ำ</span></span></label>
+        <label class="sub-check"><input type="checkbox"><span><b>ภาคเอกชน – ภาคเอกชน</b><span class="desc">เช่น 2 โรงงานอุตสาหกรรมแย่งน้ำ</span></span></label>
       </div>
     </div>
 
@@ -648,10 +659,10 @@
       </div>
       <p class="q-hint" style="margin-bottom:14px;font-weight:500;color:var(--ink);">ท่านเห็นด้วยกับร่างวิสัยทัศน์นี้ระดับใด?</p>
       <div class="choices" id="vision-choices">
-        <button class="choice" data-vkey="agree_strong" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วยอย่างยิ่ง</span></button>
-        <button class="choice" data-vkey="agree" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วย</span></button>
-        <button class="choice" data-vkey="improve" onclick="pickRadio(this);toggleSub('vision-feedback',true)"><span class="icon"></span><span class="text">เห็นด้วย แต่ควรปรับปรุงบางส่วน</span></button>
-        <button class="choice" data-vkey="disagree" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">ไม่เห็นด้วย</span></button>
+        <button class="choice" data-vkey="agree_strong" onclick="pickVision(this)"><span class="icon"></span><span class="text">เห็นด้วยอย่างยิ่ง</span></button>
+        <button class="choice" data-vkey="agree" onclick="pickVision(this)"><span class="icon"></span><span class="text">เห็นด้วย</span></button>
+        <button class="choice" data-vkey="improve" onclick="pickVision(this)"><span class="icon"></span><span class="text">เห็นด้วย แต่ควรปรับปรุงบางส่วน</span></button>
+        <button class="choice" data-vkey="disagree" onclick="pickVision(this)"><span class="icon"></span><span class="text">ไม่เห็นด้วย</span></button>
       </div>
       <div class="sub-wrap" id="vision-feedback" style="display:none;">
         <p>ท่านคิดว่าควรปรับปรุงส่วนใด?</p>
@@ -724,16 +735,16 @@
       <p class="q-hint">ใส่เลข 1 = เหมาะสมที่สุด ถึง 4 = เหมาะสมน้อยที่สุด</p>
       <div class="rank-picker" data-max="4">
         <div class="rank-row-wrap">
-          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 0 คงสภาพเดิม (BAU)</b><div class="strat-desc">คงการดำเนินงานตามแผนงานเดิมโดยไม่ปรับเปลี่ยนเชิงยุทธศาสตร์ (ปัญหาต้นน้ำ-กลางน้ำ-ปลายน้ำยังคงอยู่ น้ำเค็มรุก ประปาหมู่บ้านขาดน้ำ ระบบข้อมูลแยกส่วน)</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 0 คงสภาพเดิม (BAU)</b><div class="strat-desc">คงการดำเนินงานตามแผนงานเดิมโดยไม่ปรับเปลี่ยนเชิงยุทธศาสตร์ (ปัญหาต้นน้ำ-กลางน้ำ-ปลายน้ำยังคงอยู่ น้ำเค็มรุก ประปาหมู่บ้านขาดน้ำ ระบบข้อมูลแยกส่วน)<div class="climate-note">การคงสภาพตามปกติจะทำให้ลุ่มน้ำขาดแผนรับมือด้านการเปลี่ยนแปลงสภาพภูมิอากาศ ส่งผลให้เสี่ยงประสบปัญหาภัยแล้งที่ยาวนานขึ้น ฝนตกหนักผิดปกติ สร้างความเสียหายต่อระบบนิเวศ โครงสร้างพื้นฐาน และเศรษฐกิจอย่างรุนแรงและคาดการณ์ได้ยากขึ้น</div></div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
         </div>
         <div class="rank-row-wrap">
-          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 1 เน้นโครงสร้างพื้นฐานและเพิ่มน้ำต้นทุน</b><div class="strat-desc">ลงทุนเชิงกายภาพและสิ่งก่อสร้าง เช่น อ่างเก็บน้ำ ฝาย ประตูระบายน้ำ ขุดลอกลำน้ำ ขยายท่อส่ง สถานีสูบน้ำ คันกั้นน้ำทะเล บ่อบาดาล</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 1 เน้นโครงสร้างพื้นฐานและเพิ่มน้ำต้นทุน</b><div class="strat-desc">ลงทุนเชิงกายภาพและสิ่งก่อสร้าง เช่น อ่างเก็บน้ำ ฝาย ประตูระบายน้ำ ขุดลอกลำน้ำ ขยายท่อส่ง สถานีสูบน้ำ คันกั้นน้ำทะเล บ่อบาดาล<div class="climate-note">ยกระดับมาตรฐานการออกแบบและก่อสร้างโครงสร้างพื้นฐานทางวิศวกรรมให้มีความยืดหยุ่นต่อสภาพภูมิอากาศ เช่น การเพิ่มขีดความสามารถในการรองรับความไม่แน่นอนของปริมาณน้ำฝน รวมถึงออกแบบประตูระบายน้ำและสถานีสูบน้ำเพื่อรับมือกับระดับน้ำทะเลที่เพิ่มสูงขึ้น</div></div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
         </div>
         <div class="rank-row-wrap">
-          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 2 บริหารเชิงนิเวศและนวัตกรรมเทคโนโลยี</b><div class="strat-desc">ฟื้นฟูระบบนิเวศธรรมชาติร่วมกับเทคโนโลยีใหม่ (NBS/EBa ป่าต้นน้ำ, Reuse น้ำเสีย, แก้มลิงธรรมชาติ, เซนเซอร์ความเค็ม, ป่าชายเลน, เกษตรแม่นยำ, ระบบเตือนภัย real-time)</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 2 บริหารเชิงนิเวศและนวัตกรรมเทคโนโลยี</b><div class="strat-desc">ฟื้นฟูระบบนิเวศธรรมชาติร่วมกับเทคโนโลยีใหม่ (NBS/EBa ป่าต้นน้ำ, Reuse น้ำเสีย, แก้มลิงธรรมชาติ, เซนเซอร์ความเค็ม, ป่าชายเลน, เกษตรแม่นยำ, ระบบเตือนภัย real-time)<div class="climate-note">บูรณาการฐานข้อมูลเพื่อวางแผนรับมือล่วงหน้า ร่วมกับการใช้แนวทางธรรมชาติ เช่น การปลูกป่าต้นน้ำและป่าชายเลน ที่เป็นแหล่งดูดซับคาร์บอน ช่วยทั้งการปรับตัวและบรรเทาความรุนแรงของการเปลี่ยนแปลงสภาพภูมิอากาศ</div></div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
         </div>
         <div class="rank-row-wrap">
-          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 3 ยกระดับธรรมาภิบาลและชุมชนมีส่วนร่วม</b><div class="strat-desc">ปรับปรุงโครงสร้างสถาบัน กฎหมาย กระจายอำนาจให้ท้องถิ่น ผ่านข้อตกลงป่าชุมชน องค์กรผู้ใช้น้ำ อปท. คณะกรรมการลุ่มน้ำ และแพลตฟอร์มรับฟังความคิดเห็น</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 3 ยกระดับธรรมาภิบาลและชุมชนมีส่วนร่วม</b><div class="strat-desc">ปรับปรุงโครงสร้างสถาบัน กฎหมาย กระจายอำนาจให้ท้องถิ่น ผ่านข้อตกลงป่าชุมชน องค์กรผู้ใช้น้ำ อปท. คณะกรรมการลุ่มน้ำ และแพลตฟอร์มรับฟังความคิดเห็น<div class="climate-note">มุ่งเน้นการเสริมสร้างขีดความสามารถให้กับชุมชนและท้องถิ่นให้ก้าวไปสู่ชุมชนพร้อมรับมือสภาพภูมิอากาศ พร้อมผลักดันให้เกิดกลไกสนับสนุนระดับชุมชน เพื่อรองรับการปรับตัวและเยียวยาความเสียหายจากภัยพิบัติที่เกิดจากการเปลี่ยนแปลงสภาพภูมิอากาศ</div></div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
         </div>
         <div class="rank-warn" style="display:none;">มีอันดับซ้ำกัน กรุณาแก้ไข</div>
       </div>
@@ -804,62 +815,84 @@
   </div>
 
   <div class="wrap" style="padding-top:24px;">
-    <div class="stat-grid">
-      <div class="stat-box"><div class="stat-num" id="stat-responses">0</div><div class="stat-label">ผู้ตอบทั้งหมด</div></div>
-      <div class="stat-box"><div class="stat-num" id="stat-words">0</div><div class="stat-label">คำในเวิร์ดคลาวด์</div></div>
-      <div class="stat-box"><div class="stat-num" id="stat-word-total">0</div><div class="stat-label">จำนวนคำที่พิมพ์</div></div>
-      <div class="stat-box"><div class="stat-num" id="stat-votes">0</div><div class="stat-label">โหวตวิสัยทัศน์</div></div>
+    <div class="steps" style="margin-bottom:20px;">
+      <button class="step-btn active" data-atab="1" onclick="adminGo(1)"><div class="step-num">1</div><div class="step-label">ภาพรวม</div></button>
+      <button class="step-btn" data-atab="2" onclick="adminGo(2)"><div class="step-num">2</div><div class="step-label">กราฟแท่ง</div></button>
+      <button class="step-btn" data-atab="3" onclick="adminGo(3)"><div class="step-num">3</div><div class="step-label">รายละเอียด</div></button>
+      <button class="step-btn" data-atab="4" onclick="adminGo(4)"><div class="step-num">4</div><div class="step-label">จัดการ</div></button>
     </div>
 
-    <div class="admin-section">
-      <h2>Export ข้อมูล</h2>
-      <p style="color:var(--ink-soft);font-size:16px;margin-bottom:14px;">รวมข้อมูลทั้งหมดในไฟล์ Excel เดียว แบ่งเป็น sheet ตามประเภท</p>
-      <div class="btn-group">
-        <button class="btn success" onclick="exportExcel()">ดาวน์โหลด Excel</button>
+    <!-- Admin panel 1: ภาพรวม -->
+    <section class="panel active" data-apanel="1">
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-num" id="stat-responses">0</div><div class="stat-label">ผู้ตอบทั้งหมด</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-words">0</div><div class="stat-label">คำในเวิร์ดคลาวด์</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-word-total">0</div><div class="stat-label">จำนวนคำที่เลือก</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-votes">0</div><div class="stat-label">โหวตวิสัยทัศน์</div></div>
       </div>
-      <div class="admin-note">Sheet ที่จะได้: รายการตอบทั้งหมด, เวิร์ดคลาวด์, ผลโหวตวิสัยทัศน์, ข้อเสนอแนะ, สรุปตามลุ่มน้ำ</div>
-    </div>
-
-    <div class="admin-section">
-      <h2>Reset ข้อมูล</h2>
-      <p style="color:var(--ink-soft);font-size:16px;margin-bottom:14px;">ใช้เมื่อเริ่ม workshop รอบใหม่ · <b style="color:var(--danger);">ระวัง — ลบแล้วเรียกคืนไม่ได้</b></p>
-      <div class="btn-group">
-        <button class="btn ghost" onclick="resetData('cloud')">Reset เวิร์ดคลาวด์</button>
-        <button class="btn ghost" onclick="resetData('poll')">Reset โหวตวิสัยทัศน์</button>
-        <button class="btn ghost" onclick="resetData('responses')">Reset รายการตอบ</button>
-        <button class="btn danger" onclick="resetData('all')">Reset ทั้งหมด</button>
+      <div class="admin-section">
+        <h2>เวิร์ดคลาวด์ (realtime)</h2>
+        <div class="admin-cloud" id="admin-cloud"><p class="admin-empty" style="padding:20px 0;">ยังไม่มีคำตอบ</p></div>
       </div>
-    </div>
+      <div class="admin-section">
+        <h2>รายการตอบล่าสุด</h2>
+        <div id="recent-list"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+    </section>
 
-    <div class="admin-section">
-      <h2>เวิร์ดคลาวด์ (realtime)</h2>
-      <div class="admin-cloud" id="admin-cloud"><p class="admin-empty" style="padding:20px 0;">ยังไม่มีคำตอบ</p></div>
-    </div>
+    <!-- Admin panel 2: กราฟแท่ง -->
+    <section class="panel" data-apanel="2">
+      <div class="admin-section">
+        <h2>จำนวนคำที่ถูกเลือก (1.2)</h2>
+        <div class="agg-list" id="agg-words"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+      <div class="admin-section">
+        <h2>ผลโหวตวิสัยทัศน์ (2)</h2>
+        <div class="agg-list" id="agg-vision"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+    </section>
 
-    <div class="admin-section">
-      <h2>สรุปตามลุ่มน้ำ (realtime)</h2>
-      <div class="agg-list" id="agg-basin"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-    </div>
+    <!-- Admin panel 3: รายละเอียด -->
+    <section class="panel" data-apanel="3">
+      <div class="admin-section">
+        <h2>สรุปตามลุ่มน้ำ (1.1)</h2>
+        <div class="agg-list" id="agg-basin"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+      <div class="admin-section">
+        <h2>ประเด็นที่คนกังวล (1.3)</h2>
+        <div class="agg-list" id="agg-concerns"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+      <div class="admin-section">
+        <h2>ความขัดแย้ง (1.4)</h2>
+        <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+      <div class="admin-section">
+        <h2>แผนงานยอดนิยม (4.3)</h2>
+        <div class="agg-list" id="agg-plans"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+    </section>
 
-    <div class="admin-section">
-      <h2>ประเด็นที่คนกังวล (1.3)</h2>
-      <div class="agg-list" id="agg-concerns"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-    </div>
-
-    <div class="admin-section">
-      <h2>ความขัดแย้ง (1.4)</h2>
-      <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-    </div>
-
-    <div class="admin-section">
-      <h2>แผนงานยอดนิยม (4.3)</h2>
-      <div class="agg-list" id="agg-plans"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-    </div>
-
-    <div class="admin-section">
-      <h2>รายการตอบล่าสุด (10 อันล่าสุด)</h2>
-      <div id="recent-list"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-    </div>
+    <!-- Admin panel 4: จัดการ -->
+    <section class="panel" data-apanel="4">
+      <div class="admin-section">
+        <h2>Export ข้อมูล</h2>
+        <p style="color:var(--ink-soft);font-size:16px;margin-bottom:14px;">รวมข้อมูลทั้งหมดในไฟล์ Excel เดียว แบ่งเป็น sheet ตามประเภท</p>
+        <div class="btn-group">
+          <button class="btn success" onclick="exportExcel()">ดาวน์โหลด Excel</button>
+        </div>
+        <div class="admin-note">Sheet ที่จะได้: รายการตอบทั้งหมด, เวิร์ดคลาวด์, ผลโหวตวิสัยทัศน์, ข้อเสนอแนะ, สรุปตามลุ่มน้ำ</div>
+      </div>
+      <div class="admin-section">
+        <h2>Reset ข้อมูล</h2>
+        <p style="color:var(--ink-soft);font-size:16px;margin-bottom:14px;">ใช้เมื่อเริ่ม workshop รอบใหม่ · <b style="color:var(--danger);">ระวัง — ลบแล้วเรียกคืนไม่ได้</b></p>
+        <div class="btn-group">
+          <button class="btn ghost" onclick="resetData('cloud')">Reset เวิร์ดคลาวด์</button>
+          <button class="btn ghost" onclick="resetData('poll')">Reset โหวตวิสัยทัศน์</button>
+          <button class="btn ghost" onclick="resetData('responses')">Reset รายการตอบ</button>
+          <button class="btn danger" onclick="resetData('all')">Reset ทั้งหมด</button>
+        </div>
+      </div>
+    </section>
 
     <div style="text-align:center;margin-top:20px;"><a href="./" style="color:var(--brand);font-size:15px;">← กลับไปหน้าผู้ตอบ</a></div>
   </div>
@@ -885,12 +918,20 @@
     actuallyGo(n);
   }
   function actuallyGo(n){
-    document.querySelectorAll('.step-btn').forEach(t=>{
+    document.querySelectorAll('#main-view .step-btn').forEach(t=>{
       t.classList.remove('active','done');
       if(t.dataset.tab==n) t.classList.add('active');
       else if(t.dataset.tab<n) t.classList.add('done');
     });
-    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.dataset.panel==n));
+    document.querySelectorAll('#main-view .panel').forEach(p=>p.classList.toggle('active', p.dataset.panel==n));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function adminGo(n){
+    document.querySelectorAll('#admin-view .step-btn').forEach(t=>{
+      t.classList.remove('active','done');
+      if(t.dataset.atab==n) t.classList.add('active');
+    });
+    document.querySelectorAll('#admin-view .panel').forEach(p=>p.classList.toggle('active', p.dataset.apanel==n));
     window.scrollTo({top:0,behavior:'smooth'});
   }
   function validatePanel(n){
@@ -900,10 +941,11 @@
     if(n===1){
       const cards = panel.querySelectorAll('.card');
       if(!cards[0].querySelector('.choice.selected')) errs.push(cards[0]);
-      // 1.2 area (word cloud is optional aggregate, area is required)
+      // 1.2 word (required) + area (required)
+      if(!cards[1].querySelector('#word-choices .choice.selected')) errs.push(cards[1].querySelector('#word-choices'));
       const area = cards[1].querySelector('#area-input');
       if(area && !area.value.trim()) errs.push(area);
-      if(!cards[2].querySelectorAll('.choice.selected').length) errs.push(cards[2]);
+      if(!cards[2].querySelector('.choice.selected')) errs.push(cards[2].querySelector('#concern-choices'));
       const cb = cards[3].querySelector('.choices .choice.selected');
       if(!cb) errs.push(cards[3].querySelector('.choices'));
       else{
@@ -1032,18 +1074,79 @@
 
   window.mySubmittedWords = [];
 
-  /* -------- Word cloud (LIVE) -------- */
-  function submitWord(){
-    const input = document.getElementById('word-input');
-    const word = input.value.trim().replace(/\s+/g,' ').replace(/[.,]/g,'');
-    if(!word) return;
-    const btn = input.nextElementSibling;
-    btn.disabled = true;
+  /* -------- Word pick (one-time, preset) -------- */
+  function pickWord(el){
+    if(localStorage.getItem('wordVoted')) return;
+    // select this + lock all
+    el.parentElement.querySelectorAll('.choice').forEach(o=>{
+      o.classList.remove('selected');
+      o.classList.add('locked');
+    });
+    el.classList.add('selected');
+    const word = el.dataset.word;
     cloudRef.set({ words: { [word]: increment(1) } }, { merge:true })
-      .then(()=>{ window.mySubmittedWords.push(word); input.value=''; })
-      .catch(e=>{ console.error(e); alert('ส่งไม่สำเร็จ: '+e.message); })
-      .finally(()=>{ btn.disabled=false; input.focus(); });
+      .then(()=>{ window.mySubmittedWords.push(word); localStorage.setItem('wordVoted', word); })
+      .catch(e=>{
+        console.error(e); alert('ส่งไม่สำเร็จ: '+e.message);
+        // unlock on error
+        el.parentElement.querySelectorAll('.choice').forEach(o=>o.classList.remove('locked'));
+      });
   }
+  function pickConcern(el){
+    if(localStorage.getItem('concernVoted')) return;
+    el.parentElement.querySelectorAll('.choice').forEach(o=>{
+      o.classList.remove('selected');
+      o.classList.add('locked');
+    });
+    el.classList.add('selected');
+    localStorage.setItem('concernVoted', el.querySelector('.text').textContent);
+  }
+  function pickVision(el){
+    if(localStorage.getItem('visionVoted')){
+      // Allow only if same as previous (re-clicking doesn't count)
+      return;
+    }
+    const key = el.dataset.vkey;
+    el.parentElement.querySelectorAll('.choice').forEach(o=>{
+      o.classList.remove('selected');
+      o.classList.add('locked');
+    });
+    el.classList.add('selected');
+    toggleSub('vision-feedback', key==='improve');
+    // Save vote realtime
+    const upd = { votes: { [key]: increment(1) } };
+    pollRef.set(upd, {merge:true})
+      .then(()=>{ localStorage.setItem('visionVoted', key); })
+      .catch(e=>{
+        console.error(e); alert('โหวตไม่สำเร็จ: '+e.message);
+        el.parentElement.querySelectorAll('.choice').forEach(o=>o.classList.remove('locked'));
+      });
+  }
+  // Restore lock state on page load
+  window.addEventListener('DOMContentLoaded',()=>{
+    const wv = localStorage.getItem('wordVoted');
+    if(wv){
+      document.querySelectorAll('#word-choices .choice').forEach(o=>{
+        o.classList.add('locked');
+        if(o.dataset.word === wv) o.classList.add('selected');
+      });
+    }
+    const cv = localStorage.getItem('concernVoted');
+    if(cv){
+      document.querySelectorAll('#concern-choices .choice').forEach(o=>{
+        o.classList.add('locked');
+        if(o.querySelector('.text').textContent === cv) o.classList.add('selected');
+      });
+    }
+    const vv = localStorage.getItem('visionVoted');
+    if(vv){
+      document.querySelectorAll('#vision-choices .choice').forEach(o=>{
+        o.classList.add('locked');
+        if(o.dataset.vkey === vv) o.classList.add('selected');
+      });
+      if(vv === 'improve') toggleSub('vision-feedback', true);
+    }
+  });
   cloudRef.onSnapshot(doc=>{
     const words = doc.exists ? (doc.data().words || {}) : {};
     renderCloud(words);
@@ -1102,7 +1205,8 @@
     let basin = null;
     if(basinBtn){ const code = basinBtn.querySelector('.code'); basin = code ? code.textContent.split('·')[0].trim() : null; }
     const area = (document.getElementById('area-input')?.value || '').trim();
-    const concerns = [...cards[2].querySelectorAll('.choice.selected')].map(b=>b.querySelector('.text').textContent.trim());
+    const concernBtn = cards[2].querySelector('.choice.selected');
+    const concern = concernBtn ? concernBtn.querySelector('.text').textContent.trim() : null;
     const conflictBtn = cards[3].querySelector('.choices .choice.selected');
     const cmap = ['none','past','potential'];
     let conflict = null;
@@ -1131,7 +1235,7 @@
 
     const plans = [...document.querySelectorAll('#plans .choice.selected')].map(b=>b.querySelector('.text').textContent.trim());
 
-    return {basin, area, concerns, conflict, conflict_types, vision, vision_comment, strategy_status, strategy_add, strategy_rank, dev_rank, dim_rank, plans, words:[...window.mySubmittedWords]};
+    return {basin, area, concern, conflict, conflict_types, vision, vision_comment, strategy_status, strategy_add, strategy_rank, dev_rank, dim_rank, plans, words:[...window.mySubmittedWords]};
   }
 
   async function submitAll(){
@@ -1150,10 +1254,9 @@
     try{
       const data = collectData();
       await responsesRef.add({...data, ts: serverTimestamp()});
-      if(data.vision){
-        const upd = { votes: { [data.vision]: increment(1) } };
-        if(data.vision === 'improve' && data.vision_comment) upd.feedback = arrayUnion(data.vision_comment);
-        await pollRef.set(upd, {merge:true});
+      // Vision already voted realtime on click. Only save improve feedback here.
+      if(data.vision === 'improve' && data.vision_comment){
+        await pollRef.set({ feedback: arrayUnion(data.vision_comment) }, {merge:true});
       }
       document.getElementById('success-overlay').classList.add('show');
     }catch(e){
@@ -1181,10 +1284,12 @@
       document.getElementById('stat-words').textContent = Object.keys(w).length;
       document.getElementById('stat-word-total').textContent = Object.values(w).reduce((s,c)=>s+c,0);
       renderAdminCloud(w);
+      renderAggBox('agg-words', w);
     });
     pollRef.onSnapshot(doc=>{
       const v = doc.exists ? (doc.data().votes || {}) : {};
       document.getElementById('stat-votes').textContent = Object.values(v).reduce((s,c)=>s+c,0);
+      renderAggBox('agg-vision', v, k=>VISION_LABEL[k]||k);
     });
   }
   function renderAdminCloud(words){
@@ -1221,6 +1326,8 @@
     const basinC = {}, concernC = {}, conflictC = {}, planC = {};
     all.forEach(r=>{
       if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
+      // support both new (single concern) and old (concerns array)
+      if(r.concern) concernC[r.concern] = (concernC[r.concern]||0)+1;
       (r.concerns||[]).forEach(c=>concernC[c] = (concernC[c]||0)+1);
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
@@ -1274,7 +1381,7 @@
       const wb = XLSX.utils.book_new();
 
       // Sheet 1 — รายการตอบ
-      const header = ['วันที่-เวลา','รหัสลุ่มน้ำ','ลุ่มน้ำ','บริเวณ','คำที่พิมพ์','ประเด็นกังวล','ความขัดแย้ง','คู่ความขัดแย้ง','วิสัยทัศน์','ข้อเสนอแนะวิสัยทัศน์','ยุทธ์เหมาะสม/เพิ่ม','เพิ่มยุทธ์'];
+      const header = ['วันที่-เวลา','รหัสลุ่มน้ำ','ลุ่มน้ำ','บริเวณ','คำที่เลือก','ประเด็นกังวล','ความขัดแย้ง','คู่ความขัดแย้ง','วิสัยทัศน์','ข้อเสนอแนะวิสัยทัศน์','ยุทธ์เหมาะสม/เพิ่ม','เพิ่มยุทธ์'];
       for(let i=1;i<=5;i++) header.push('อันดับยุทธ์ '+i);
       for(let i=0;i<=3;i++) header.push('อันดับทางเลือก '+i);
       header.push('อันดับเศรษฐกิจ','อันดับสังคม','อันดับสิ่งแวดล้อม','แผนงานที่เลือก');
@@ -1287,7 +1394,7 @@
           r.basin ? (BASIN_LABEL[r.basin]||'') : '',
           r.area || '',
           (r.words||[]).join(', '),
-          (r.concerns||[]).join(', '),
+          r.concern || (r.concerns||[]).join(', '),
           r.conflict ? CONFLICT_LABEL[r.conflict] : '',
           (r.conflict_types||[]).join(', '),
           r.vision ? VISION_LABEL[r.vision] : '',
