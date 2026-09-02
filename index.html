@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>เวทีรับฟังความคิดเห็น | ลุ่มน้ำบางปะกง</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Firebase (compat build — works with plain <script> tags, no bundler needed) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="header">
+    <div class="wrap">
+      <p class="eyebrow-free">เวทีรับฟังความคิดเห็นสาธารณะ</p>
+      <h1>แผนแม่บทการบริหารจัดการทรัพยากรน้ำ<br>ลุ่มน้ำบางปะกง</h1>
+      <p>พิมพ์คำตอบจากโทรศัพท์ของท่านได้เลย ผลลัพธ์จะปรากฏแบบสดให้ทุกคนเห็นพร้อมกัน</p>
+    </div>
+    <svg class="wave" viewBox="0 0 400 40" preserveAspectRatio="none">
+      <path d="M0,20 C50,35 100,5 150,20 C200,35 250,5 300,20 C330,30 370,10 400,20 L400,40 L0,40 Z" fill="#F1F6F6"></path>
+    </svg>
+  </div>
+
+  <div class="wrap">
+    <div class="tabbar">
+      <button class="tab active" id="tab-btn-cloud" onclick="switchTab('cloud')">คำเดียวที่นึกถึง</button>
+      <button class="tab" id="tab-btn-poll" onclick="switchTab('poll')">ยืนยันวิสัยทัศน์</button>
+    </div>
+
+    <!-- ===================== WORD CLOUD PANEL ===================== -->
+    <section class="panel active" id="panel-cloud">
+      <p class="question">เมื่อพูดถึงปัญหาทรัพยากรน้ำในพื้นที่ของท่าน ท่านนึกถึงปัญหาใดมากที่สุด?</p>
+
+      <div class="input-row">
+        <input type="text" id="word-input" maxlength="30" placeholder="เช่น น้ำท่วม, น้ำแล้ง, น้ำเค็ม..." autocomplete="off">
+        <button class="btn" id="word-submit">ส่งคำตอบ</button>
+      </div>
+      <p class="hint">พิมพ์สั้น ๆ คำเดียวหรือวลีสั้น ๆ ส่งได้หลายครั้ง</p>
+
+      <div class="cloud-frame" id="cloud-frame">
+        <p class="empty-state">ยังไม่มีคำตอบ — เป็นคนแรกที่พิมพ์คำตอบได้เลย</p>
+      </div>
+
+      <div class="meta-row">
+        <span id="cloud-total">ยังไม่มีผู้ตอบ</span>
+        <span class="meta-actions admin-only" style="display:none">
+          <button class="reset-link export" onclick="exportCloudExcel()">ส่งออกเป็น Excel</button>
+          <button class="reset-link" onclick="resetData('cloud')">ล้างคำตอบทั้งหมด</button>
+        </span>
+      </div>
+    </section>
+
+    <!-- ===================== POLL PANEL ===================== -->
+    <section class="panel" id="panel-poll">
+      <p class="question">โดยภาพรวม ท่านเห็นด้วยกับร่างวิสัยทัศน์การบริหารจัดการทรัพยากรน้ำลุ่มน้ำบางปะกงในระดับใด?</p>
+
+      <div class="options" id="poll-options" role="radiogroup"></div>
+
+      <div class="feedback-wrap" id="feedback-wrap">
+        <textarea id="feedback-text" maxlength="500" placeholder="ท่านคิดว่าควรปรับปรุงส่วนใด? (ไม่บังคับ)"></textarea>
+      </div>
+
+      <div class="poll-actions">
+        <button class="btn btn-full" id="poll-submit" disabled>ส่งคำตอบ</button>
+      </div>
+      <div id="voted-note" style="display:none" class="voted-note">บันทึกคำตอบของท่านแล้ว ขอบคุณที่ร่วมแสดงความคิดเห็น</div>
+
+      <div class="results">
+        <h3>ผลรวมแบบสด</h3>
+        <div id="poll-results"></div>
+      </div>
+
+      <div class="meta-row">
+        <span id="poll-total">ยังไม่มีผู้ลงคะแนน</span>
+        <span class="meta-actions admin-only" style="display:none">
+          <button class="reset-link export" onclick="exportPollExcel()">ส่งออกเป็น Excel</button>
+          <button class="reset-link" onclick="resetData('poll')">ล้างคำตอบทั้งหมด</button>
+        </span>
+      </div>
+    </section>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
