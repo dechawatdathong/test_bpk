@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root{
     --bg:#F7F9FB;
@@ -486,9 +489,37 @@
     .card{padding:22px 18px;}
     .rank-select{width:88px;}
   }
+
+  /* ============ ADMIN PANEL ============ */
+  #admin-view{display:none;}
+  body.admin #main-view{display:none;}
+  body.admin #admin-view{display:block;}
+  .admin-header{background:linear-gradient(135deg,#3F2C5B 0%,#5B4285 100%);color:#fff;padding:32px 20px;}
+  .admin-header .brand-badge{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.25);color:#E8DEF0;}
+  .admin-header h1{color:#fff;font-size:30px;margin-bottom:6px;}
+  .admin-header p{color:#D4C5EA;font-size:16px;}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+  .stat-box{background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow-sm);}
+  .stat-num{font-size:32px;font-weight:700;color:var(--brand);line-height:1.1;font-family:'TH Sarabun New','Sarabun',sans-serif;}
+  .stat-label{font-size:15px;color:var(--ink-soft);margin-top:4px;}
+  .admin-section{background:var(--card);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-md);margin-bottom:16px;}
+  .admin-section h2{font-size:22px;color:var(--brand-dark);margin-bottom:14px;}
+  .btn-group{display:flex;flex-wrap:wrap;gap:10px;}
+  .btn.danger{background:var(--danger);}
+  .btn.danger:hover{background:#A0432E;}
+  .btn.success{background:var(--success);}
+  .btn.success:hover{background:#26805C;}
+  .admin-table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  .admin-table th{background:var(--brand-light);color:var(--brand-dark);text-align:left;padding:10px 12px;font-weight:600;font-size:14px;}
+  .admin-table td{padding:8px 12px;border-top:1px solid var(--line);vertical-align:top;}
+  .admin-table tbody tr:hover{background:var(--brand-lighter);}
+  .admin-empty{text-align:center;color:var(--ink-mute);padding:30px 20px;font-size:16px;}
+  .admin-note{background:var(--accent-light);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;font-size:14px;color:var(--ink-soft);margin-top:12px;}
 </style>
 </head>
 <body>
+
+<div id="main-view">
 
 <div class="header">
   <div class="wrap">
@@ -533,23 +564,17 @@
       <h3 class="q-title">ปัญหาเรื่องน้ำที่สำคัญที่สุดในปัจจุบันคืออะไร?</h3>
       <p class="q-hint">พิมพ์สั้นๆ 1 คำ เช่น น้ำท่วม น้ำแล้ง น้ำเค็ม (ส่งได้หลายครั้ง)</p>
       <div class="field" style="display:flex;gap:8px;">
-        <input type="text" id="word-input" maxlength="30" placeholder="พิมพ์ปัญหาน้ำในพื้นที่ของท่าน...">
-        <button class="btn" onclick="mockWord()">ส่ง</button>
+        <input type="text" id="word-input" maxlength="30" placeholder="พิมพ์ปัญหาน้ำในพื้นที่ของท่าน..." onkeydown="if(event.key==='Enter')submitWord()">
+        <button class="btn" onclick="submitWord()">ส่ง</button>
       </div>
       <div class="field">
         <label class="field-label">บริเวณ (ไม่บังคับ)</label>
-        <input type="text" placeholder="หมู่/ตำบล/อำเภอ/จังหวัด">
+        <input type="text" id="area-input" placeholder="หมู่/ตำบล/อำเภอ/จังหวัด">
       </div>
       <div class="cloud" id="cloud">
-        <span class="cloud-word" style="font-size:42px;color:var(--brand-dark);">น้ำท่วม</span>
-        <span class="cloud-word" style="font-size:32px;color:var(--brand);">น้ำแล้ง</span>
-        <span class="cloud-word" style="font-size:28px;color:var(--accent);">น้ำเค็ม</span>
-        <span class="cloud-word" style="font-size:22px;color:#1A8AB0;">น้ำเสีย</span>
-        <span class="cloud-word" style="font-size:20px;color:var(--brand);">ประปา</span>
-        <span class="cloud-word" style="font-size:18px;color:var(--accent);">แย่งน้ำ</span>
-        <span class="cloud-word" style="font-size:17px;color:var(--brand-dark);">น้ำไม่พอ</span>
+        <p class="empty-cloud" style="color:var(--ink-mute);">ยังไม่มีคำตอบ</p>
       </div>
-      <p class="cloud-stat">คำตอบทั้งหมด <b>142</b> รายการ · <b>7</b> คำ</p>
+      <p class="cloud-stat" id="cloud-stat">คำตอบทั้งหมด <b>0</b> รายการ · <b>0</b> คำ</p>
     </div>
 
     <div class="card">
@@ -599,11 +624,11 @@
         <p>ทรัพยากรน้ำมั่นคงและยั่งยืน จัดสรรอย่างเป็นธรรมรองรับเศรษฐกิจและ EEC ยืดหยุ่นต่อภัยพิบัติและการเปลี่ยนแปลงสภาพภูมิอากาศ ฟื้นฟูระบบนิเวศอย่างสมดุล ภายใต้การบริหารจัดการแบบบูรณาการและการมีส่วนร่วมของทุกภาคส่วน</p>
       </div>
       <p class="q-hint" style="margin-bottom:14px;font-weight:500;color:var(--ink);">ท่านเห็นด้วยกับร่างวิสัยทัศน์นี้ระดับใด?</p>
-      <div class="choices">
-        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วยอย่างยิ่ง</span></button>
-        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วย</span></button>
-        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',true)"><span class="icon"></span><span class="text">เห็นด้วย แต่ควรปรับปรุงบางส่วน</span></button>
-        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">ไม่เห็นด้วย</span></button>
+      <div class="choices" id="vision-choices">
+        <button class="choice" data-vkey="agree_strong" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วยอย่างยิ่ง</span></button>
+        <button class="choice" data-vkey="agree" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วย</span></button>
+        <button class="choice" data-vkey="improve" onclick="pickRadio(this);toggleSub('vision-feedback',true)"><span class="icon"></span><span class="text">เห็นด้วย แต่ควรปรับปรุงบางส่วน</span></button>
+        <button class="choice" data-vkey="disagree" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">ไม่เห็นด้วย</span></button>
       </div>
       <div class="sub-wrap" id="vision-feedback" style="display:none;">
         <p>ท่านคิดว่าควรปรับปรุงส่วนใด?</p>
@@ -611,11 +636,11 @@
       </div>
 
       <div class="poll-summary">
-        <div class="poll-summary-title"><span>ผลรวมแบบสด</span><span>87 คน</span></div>
-        <div class="bar"><div class="bar-head"><span>เห็นด้วยอย่างยิ่ง</span><span class="val">32 · 37%</span></div><div class="bar-track"><div class="bar-fill c1" style="width:37%"></div></div></div>
-        <div class="bar"><div class="bar-head"><span>เห็นด้วย</span><span class="val">28 · 32%</span></div><div class="bar-track"><div class="bar-fill c2" style="width:32%"></div></div></div>
-        <div class="bar"><div class="bar-head"><span>เห็นด้วย แต่ควรปรับปรุง</span><span class="val">19 · 22%</span></div><div class="bar-track"><div class="bar-fill c3" style="width:22%"></div></div></div>
-        <div class="bar"><div class="bar-head"><span>ไม่เห็นด้วย</span><span class="val">8 · 9%</span></div><div class="bar-track"><div class="bar-fill c4" style="width:9%"></div></div></div>
+        <div class="poll-summary-title"><span>ผลรวมแบบสด</span><span id="poll-total-count">0 คน</span></div>
+        <div class="bar" data-vkey="agree_strong"><div class="bar-head"><span>เห็นด้วยอย่างยิ่ง</span><span class="val">0 · 0%</span></div><div class="bar-track"><div class="bar-fill c1" style="width:0%"></div></div></div>
+        <div class="bar" data-vkey="agree"><div class="bar-head"><span>เห็นด้วย</span><span class="val">0 · 0%</span></div><div class="bar-track"><div class="bar-fill c2" style="width:0%"></div></div></div>
+        <div class="bar" data-vkey="improve"><div class="bar-head"><span>เห็นด้วย แต่ควรปรับปรุง</span><span class="val">0 · 0%</span></div><div class="bar-track"><div class="bar-fill c3" style="width:0%"></div></div></div>
+        <div class="bar" data-vkey="disagree"><div class="bar-head"><span>ไม่เห็นด้วย</span><span class="val">0 · 0%</span></div><div class="bar-track"><div class="bar-fill c4" style="width:0%"></div></div></div>
       </div>
     </div>
 
@@ -740,6 +765,53 @@
   </section>
 
 </div>
+</div><!-- /#main-view -->
+
+<div id="admin-view">
+  <div class="admin-header">
+    <div class="wrap">
+      <span class="brand-badge">ADMIN PANEL</span>
+      <h1>จัดการข้อมูลเวทีรับฟังความคิดเห็น</h1>
+      <p>ดูสถิติ · Export Excel · Reset ข้อมูล</p>
+    </div>
+  </div>
+
+  <div class="wrap" style="padding-top:24px;">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num" id="stat-responses">0</div><div class="stat-label">ผู้ตอบทั้งหมด</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-words">0</div><div class="stat-label">คำในเวิร์ดคลาวด์</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-word-total">0</div><div class="stat-label">จำนวนคำที่พิมพ์</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-votes">0</div><div class="stat-label">โหวตวิสัยทัศน์</div></div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Export ข้อมูล</h2>
+      <p style="color:var(--ink-soft);font-size:16px;margin-bottom:14px;">รวมข้อมูลทั้งหมดในไฟล์ Excel เดียว แบ่งเป็น sheet ตามประเภท</p>
+      <div class="btn-group">
+        <button class="btn success" onclick="exportExcel()">ดาวน์โหลด Excel</button>
+      </div>
+      <div class="admin-note">Sheet ที่จะได้: รายการตอบทั้งหมด, เวิร์ดคลาวด์, ผลโหวตวิสัยทัศน์, ข้อเสนอแนะ, สรุปตามลุ่มน้ำ</div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Reset ข้อมูล</h2>
+      <p style="color:var(--ink-soft);font-size:16px;margin-bottom:14px;">ใช้เมื่อเริ่ม workshop รอบใหม่ · <b style="color:var(--danger);">ระวัง — ลบแล้วเรียกคืนไม่ได้</b></p>
+      <div class="btn-group">
+        <button class="btn ghost" onclick="resetData('cloud')">Reset เวิร์ดคลาวด์</button>
+        <button class="btn ghost" onclick="resetData('poll')">Reset โหวตวิสัยทัศน์</button>
+        <button class="btn ghost" onclick="resetData('responses')">Reset รายการตอบ</button>
+        <button class="btn danger" onclick="resetData('all')">Reset ทั้งหมด</button>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h2>รายการตอบล่าสุด (10 อันล่าสุด)</h2>
+      <div id="recent-list"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+    </div>
+
+    <div style="text-align:center;margin-top:20px;"><a href="./" style="color:var(--brand);font-size:15px;">← กลับไปหน้าผู้ตอบ</a></div>
+  </div>
+</div>
 
 <script>
   function go(n){
@@ -769,23 +841,6 @@
     const el = document.getElementById(id);
     el.style.display = show ? 'block' : 'none';
   }
-  function mockWord(){
-    const val = document.getElementById('word-input').value.trim();
-    if(!val) return;
-    const cloud = document.getElementById('cloud');
-    const s = document.createElement('span');
-    s.className = 'cloud-word';
-    s.style.fontSize = '22px';
-    s.style.color = 'var(--brand)';
-    s.textContent = val;
-    cloud.appendChild(s);
-    document.getElementById('word-input').value = '';
-  }
-  function submitAll(){
-    const d = document.getElementById('done');
-    d.style.display = 'flex';
-    d.scrollIntoView({behavior:'smooth',block:'center'});
-  }
   function toggleSubList(btn){
     const wrap = btn.closest('.rank-row-wrap') || btn.closest('.rank-row');
     const sub = wrap.querySelector('.rank-sub');
@@ -808,6 +863,293 @@
       });
     });
   });
+
+  /* ==================== FIREBASE + DATA ==================== */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPMeZuwO_5360YBU4hpfFhnyDumaCVsCU",
+    authDomain: "tesco-web-app.firebaseapp.com",
+    projectId: "tesco-web-app",
+    storageBucket: "tesco-web-app.firebasestorage.app",
+    messagingSenderId: "373186748503",
+    appId: "1:373186748503:web:ee22c8b71f69c69eaac312"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const {increment, arrayUnion, serverTimestamp} = firebase.firestore.FieldValue;
+  const cloudRef = db.collection('bangpakong').doc('wordcloud');
+  const pollRef  = db.collection('bangpakong').doc('poll');
+  const responsesRef = db.collection('bangpakong').doc('responses').collection('entries');
+
+  const BASIN_LABEL = {'1501':'คลองพระสะทึง','1502':'แม่น้ำพระปรงส่วนที่ 1','1503':'แม่น้ำพระปรงส่วนที่ 2','1504':'แม่น้ำหนุมาน','1505':'แม่น้ำปราจีนบุรีตอนล่าง','1506':'แม่น้ำนครนายก','1507':'ที่ราบแม่น้ำบางปะกงส่วนที่ 1','1508':'คลองท่าลาด','1509':'คลองหลวง','1510':'ที่ราบแม่น้ำบางปะกงส่วนที่ 2'};
+  const VISION_LABEL = {agree_strong:'เห็นด้วยอย่างยิ่ง',agree:'เห็นด้วย',improve:'เห็นด้วย แต่ควรปรับปรุงบางส่วน',disagree:'ไม่เห็นด้วย'};
+  const CONFLICT_LABEL = {none:'ไม่มี',past:'เคยเกิดขึ้นแล้ว',potential:'ยังไม่เกิด แต่มีแนวโน้ม'};
+  const STRATEGY_NAMES = ['จัดการน้ำอุปโภค-บริโภค','จัดสรรน้ำเพื่อการผลิต','จัดการภัยพิบัติทางน้ำ','ฟื้นฟูระบบนิเวศ','ยกระดับธรรมาภิบาล'];
+  const DEV_NAMES = ['BAU (คงสภาพเดิม)','โครงสร้างพื้นฐาน','เชิงนิเวศ+นวัตกรรม','ธรรมาภิบาล+ชุมชน'];
+  const DIM_LABEL = {econ:'เศรษฐกิจ',social:'สังคม',env:'สิ่งแวดล้อม'};
+
+  window.mySubmittedWords = [];
+
+  /* -------- Word cloud (LIVE) -------- */
+  function submitWord(){
+    const input = document.getElementById('word-input');
+    const word = input.value.trim().replace(/\s+/g,' ').replace(/[.,]/g,'');
+    if(!word) return;
+    const btn = input.nextElementSibling;
+    btn.disabled = true;
+    cloudRef.set({ words: { [word]: increment(1) } }, { merge:true })
+      .then(()=>{ window.mySubmittedWords.push(word); input.value=''; })
+      .catch(e=>{ console.error(e); alert('ส่งไม่สำเร็จ: '+e.message); })
+      .finally(()=>{ btn.disabled=false; input.focus(); });
+  }
+  cloudRef.onSnapshot(doc=>{
+    const words = doc.exists ? (doc.data().words || {}) : {};
+    renderCloud(words);
+  }, err=>console.error('cloud err:',err));
+
+  function renderCloud(words){
+    const cloud = document.getElementById('cloud');
+    const stat = document.getElementById('cloud-stat');
+    const entries = Object.entries(words);
+    cloud.innerHTML = '';
+    if(entries.length===0){
+      cloud.innerHTML = '<p style="color:var(--ink-mute);">ยังไม่มีคำตอบ — พิมพ์เลย</p>';
+      stat.innerHTML = 'คำตอบทั้งหมด <b>0</b> รายการ · <b>0</b> คำ';
+      return;
+    }
+    entries.sort((a,b)=>b[1]-a[1]);
+    const max = entries[0][1];
+    const total = entries.reduce((s,[,c])=>s+c,0);
+    const palette = ['var(--brand-dark)','var(--brand)','var(--accent)','#1A8AB0'];
+    entries.forEach(([w,c],i)=>{
+      const size = 18 + (c/max)*32;
+      const s = document.createElement('span');
+      s.className = 'cloud-word';
+      s.style.fontSize = size.toFixed(0)+'px';
+      s.style.color = palette[i%palette.length];
+      s.title = c+' ครั้ง';
+      s.textContent = w;
+      cloud.appendChild(s);
+    });
+    stat.innerHTML = `คำตอบทั้งหมด <b>${total}</b> รายการ · <b>${entries.length}</b> คำ`;
+  }
+
+  /* -------- Vision poll display (LIVE) -------- */
+  pollRef.onSnapshot(doc=>{
+    const d = doc.exists ? doc.data() : {votes:{}, feedback:[]};
+    renderPoll(d);
+  }, err=>console.error('poll err:',err));
+
+  function renderPoll(d){
+    const votes = d.votes || {};
+    const total = Object.values(votes).reduce((s,c)=>s+c,0);
+    document.querySelectorAll('.poll-summary .bar').forEach(bar=>{
+      const k = bar.dataset.vkey;
+      const c = votes[k] || 0;
+      const pct = total ? Math.round(c/total*100) : 0;
+      bar.querySelector('.val').textContent = c+' · '+pct+'%';
+      bar.querySelector('.bar-fill').style.width = pct+'%';
+    });
+    document.getElementById('poll-total-count').textContent = total+' คน';
+  }
+
+  /* -------- Collect + submit full response -------- */
+  function collectData(){
+    const cards = document.querySelectorAll('[data-panel="1"] .card');
+    const basinBtn = cards[0]?.querySelector('.choice.selected');
+    let basin = null;
+    if(basinBtn){ const code = basinBtn.querySelector('.code'); basin = code ? code.textContent.split('·')[0].trim() : null; }
+    const area = (document.getElementById('area-input')?.value || '').trim();
+    const concerns = [...cards[2].querySelectorAll('.choice.selected')].map(b=>b.querySelector('.text').textContent.trim());
+    const conflictBtn = cards[3].querySelector('.choices .choice.selected');
+    const cmap = ['none','past','potential'];
+    let conflict = null;
+    if(conflictBtn){ const i = [...conflictBtn.parentElement.children].indexOf(conflictBtn); conflict = cmap[i]; }
+    const conflict_types = [...cards[3].querySelectorAll('.sub-check input:checked')].map(cb=>cb.parentElement.querySelector('b').textContent);
+
+    const visionBtn = document.querySelector('#vision-choices .choice.selected');
+    const vision = visionBtn ? visionBtn.dataset.vkey : null;
+    const vision_comment = (document.querySelector('#vision-feedback textarea')?.value || '').trim();
+
+    const stratBtn = document.querySelector('[data-panel="3"] .choices .choice.selected');
+    let strategy_status = null;
+    if(stratBtn){ const i = [...stratBtn.parentElement.children].indexOf(stratBtn); strategy_status = ['ok','add'][i]; }
+    const strategy_add = (document.querySelector('#strategy-add textarea')?.value || '').trim();
+
+    const pickers3 = document.querySelectorAll('[data-panel="3"] .rank-picker');
+    const strategy_rank = {};
+    pickers3[0]?.querySelectorAll('.rank-row-wrap, .rank-row').forEach((r,i)=>{ const v=r.querySelector('.rank-select')?.value; if(v) strategy_rank[String(i+1)] = parseInt(v); });
+
+    const pickers4 = document.querySelectorAll('[data-panel="4"] .rank-picker');
+    const dev_rank = {};
+    pickers4[0]?.querySelectorAll('.rank-row-wrap').forEach((r,i)=>{ const v=r.querySelector('.rank-select')?.value; if(v) dev_rank[String(i)] = parseInt(v); });
+    const dim_rank = {};
+    const dimKeys = ['econ','social','env'];
+    pickers4[1]?.querySelectorAll('.rank-row-wrap').forEach((r,i)=>{ const v=r.querySelector('.rank-select')?.value; if(v) dim_rank[dimKeys[i]] = parseInt(v); });
+
+    const plans = [...document.querySelectorAll('#plans .choice.selected')].map(b=>b.querySelector('.text').textContent.trim());
+
+    return {basin, area, concerns, conflict, conflict_types, vision, vision_comment, strategy_status, strategy_add, strategy_rank, dev_rank, dim_rank, plans, words:[...window.mySubmittedWords]};
+  }
+
+  async function submitAll(){
+    const btn = event?.currentTarget;
+    if(btn) btn.disabled = true;
+    try{
+      const data = collectData();
+      await responsesRef.add({...data, ts: serverTimestamp()});
+      // Update vision poll aggregate
+      if(data.vision){
+        const upd = { votes: { [data.vision]: increment(1) } };
+        if(data.vision === 'improve' && data.vision_comment) upd.feedback = arrayUnion(data.vision_comment);
+        await pollRef.set(upd, {merge:true});
+      }
+      document.getElementById('done').style.display = 'flex';
+      document.getElementById('done').scrollIntoView({behavior:'smooth', block:'center'});
+      if(btn) btn.textContent = 'ส่งแล้ว ขอบคุณ';
+    }catch(e){
+      console.error(e);
+      alert('บันทึกไม่สำเร็จ: '+e.message);
+      if(btn) btn.disabled = false;
+    }
+  }
+
+  /* ==================== ADMIN PANEL ==================== */
+  if(new URLSearchParams(location.search).get('admin') === '1'){
+    document.body.classList.add('admin');
+    initAdmin();
+  }
+
+  function initAdmin(){
+    responsesRef.orderBy('ts','desc').onSnapshot(snap=>{
+      document.getElementById('stat-responses').textContent = snap.size;
+      renderRecent(snap.docs.slice(0,10));
+    }, err=>console.error('resp err:',err));
+    cloudRef.onSnapshot(doc=>{
+      const w = doc.exists ? (doc.data().words || {}) : {};
+      document.getElementById('stat-words').textContent = Object.keys(w).length;
+      document.getElementById('stat-word-total').textContent = Object.values(w).reduce((s,c)=>s+c,0);
+    });
+    pollRef.onSnapshot(doc=>{
+      const v = doc.exists ? (doc.data().votes || {}) : {};
+      document.getElementById('stat-votes').textContent = Object.values(v).reduce((s,c)=>s+c,0);
+    });
+  }
+
+  function renderRecent(docs){
+    const c = document.getElementById('recent-list');
+    if(!docs.length){ c.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
+    let html = '<table class="admin-table"><thead><tr><th>วันที่</th><th>ลุ่มน้ำ</th><th>คำ</th><th>วิสัยทัศน์</th></tr></thead><tbody>';
+    docs.forEach(d=>{
+      const r = d.data();
+      const ts = r.ts?.toDate ? r.ts.toDate().toLocaleString('th-TH') : '-';
+      const basin = r.basin ? (r.basin+' · '+(BASIN_LABEL[r.basin]||'')) : '-';
+      const words = (r.words||[]).join(', ') || '-';
+      const vision = r.vision ? VISION_LABEL[r.vision] : '-';
+      html += `<tr><td>${ts}</td><td>${basin}</td><td>${words}</td><td>${vision}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    c.innerHTML = html;
+  }
+
+  async function resetData(type){
+    const labels = {cloud:'เวิร์ดคลาวด์', poll:'โหวตวิสัยทัศน์', responses:'รายการตอบทั้งหมด', all:'ข้อมูลทั้งหมด'};
+    if(!confirm('ยืนยันลบ'+labels[type]+'? ลบแล้วเรียกคืนไม่ได้')) return;
+    try{
+      if(type==='cloud' || type==='all') await cloudRef.set({words:{}});
+      if(type==='poll' || type==='all') await pollRef.set({votes:{}, feedback:[]});
+      if(type==='responses' || type==='all'){
+        const snap = await responsesRef.get();
+        const chunks = []; for(let i=0;i<snap.docs.length;i+=400) chunks.push(snap.docs.slice(i,i+400));
+        for(const chunk of chunks){ const b = db.batch(); chunk.forEach(d=>b.delete(d.ref)); await b.commit(); }
+      }
+      alert('ลบเรียบร้อย');
+    }catch(e){ alert('ลบไม่สำเร็จ: '+e.message); }
+  }
+
+  async function exportExcel(){
+    try{
+      const snap = await responsesRef.orderBy('ts','desc').get();
+      const responses = snap.docs.map(d=>d.data());
+      const cloudDoc = await cloudRef.get();
+      const words = cloudDoc.exists ? (cloudDoc.data().words||{}) : {};
+      const pollDoc = await pollRef.get();
+      const pollData = pollDoc.exists ? pollDoc.data() : {votes:{}, feedback:[]};
+
+      const wb = XLSX.utils.book_new();
+
+      // Sheet 1 — รายการตอบ
+      const header = ['วันที่-เวลา','รหัสลุ่มน้ำ','ลุ่มน้ำ','บริเวณ','คำที่พิมพ์','ประเด็นกังวล','ความขัดแย้ง','คู่ความขัดแย้ง','วิสัยทัศน์','ข้อเสนอแนะวิสัยทัศน์','ยุทธ์เหมาะสม/เพิ่ม','เพิ่มยุทธ์'];
+      for(let i=1;i<=5;i++) header.push('อันดับยุทธ์ '+i);
+      for(let i=0;i<=3;i++) header.push('อันดับทางเลือก '+i);
+      header.push('อันดับเศรษฐกิจ','อันดับสังคม','อันดับสิ่งแวดล้อม','แผนงานที่เลือก');
+      const rows = [header];
+      responses.forEach(r=>{
+        const ts = r.ts?.toDate ? r.ts.toDate().toLocaleString('th-TH') : '';
+        const row = [
+          ts,
+          r.basin || '',
+          r.basin ? (BASIN_LABEL[r.basin]||'') : '',
+          r.area || '',
+          (r.words||[]).join(', '),
+          (r.concerns||[]).join(', '),
+          r.conflict ? CONFLICT_LABEL[r.conflict] : '',
+          (r.conflict_types||[]).join(', '),
+          r.vision ? VISION_LABEL[r.vision] : '',
+          r.vision_comment || '',
+          r.strategy_status ? (r.strategy_status==='ok' ? 'เหมาะสมแล้ว' : 'ควรเพิ่มเติม') : '',
+          r.strategy_add || '',
+          r.strategy_rank?.['1']||'', r.strategy_rank?.['2']||'', r.strategy_rank?.['3']||'', r.strategy_rank?.['4']||'', r.strategy_rank?.['5']||'',
+          r.dev_rank?.['0']||'', r.dev_rank?.['1']||'', r.dev_rank?.['2']||'', r.dev_rank?.['3']||'',
+          r.dim_rank?.econ||'', r.dim_rank?.social||'', r.dim_rank?.env||'',
+          (r.plans||[]).join(', ')
+        ];
+        rows.push(row);
+      });
+      const ws1 = XLSX.utils.aoa_to_sheet(rows);
+      ws1['!cols'] = header.map((h,i)=>({wch: i===0?18 : (i<=3?16:22)}));
+      XLSX.utils.book_append_sheet(wb, ws1, 'รายการตอบทั้งหมด');
+
+      // Sheet 2 — word cloud
+      const wc = [['คำ','จำนวนครั้ง']];
+      Object.entries(words).sort((a,b)=>b[1]-a[1]).forEach(([w,c])=>wc.push([w,c]));
+      const ws2 = XLSX.utils.aoa_to_sheet(wc);
+      ws2['!cols'] = [{wch:30},{wch:14}];
+      XLSX.utils.book_append_sheet(wb, ws2, 'เวิร์ดคลาวด์');
+
+      // Sheet 3 — poll
+      const totalV = Object.values(pollData.votes||{}).reduce((s,c)=>s+c,0);
+      const pr = [['ตัวเลือก','จำนวน','ร้อยละ']];
+      ['agree_strong','agree','improve','disagree'].forEach(k=>{
+        const c = (pollData.votes||{})[k]||0;
+        const pct = totalV ? Math.round(c/totalV*100) : 0;
+        pr.push([VISION_LABEL[k], c, pct+'%']);
+      });
+      pr.push(['รวม', totalV, '100%']);
+      const ws3 = XLSX.utils.aoa_to_sheet(pr);
+      ws3['!cols'] = [{wch:36},{wch:12},{wch:12}];
+      XLSX.utils.book_append_sheet(wb, ws3, 'ผลโหวตวิสัยทัศน์');
+
+      // Sheet 4 — feedback
+      const fb = [['ข้อเสนอแนะวิสัยทัศน์']];
+      (pollData.feedback||[]).forEach(f=>fb.push([f]));
+      const ws4 = XLSX.utils.aoa_to_sheet(fb);
+      ws4['!cols'] = [{wch:80}];
+      XLSX.utils.book_append_sheet(wb, ws4, 'ข้อเสนอแนะ');
+
+      // Sheet 5 — สรุปลุ่มน้ำ
+      const bc = {};
+      responses.forEach(r=>{ if(r.basin) bc[r.basin] = (bc[r.basin]||0)+1; });
+      const br = [['รหัส','ลุ่มน้ำ','จำนวนผู้ตอบ']];
+      Object.entries(bc).sort((a,b)=>b[1]-a[1]).forEach(([code,cnt])=>br.push([code, BASIN_LABEL[code]||'?', cnt]));
+      const ws5 = XLSX.utils.aoa_to_sheet(br);
+      ws5['!cols'] = [{wch:10},{wch:36},{wch:14}];
+      XLSX.utils.book_append_sheet(wb, ws5, 'สรุปลุ่มน้ำ');
+
+      const dt = new Date();
+      const name = `เวทีบางปะกง-${dt.getFullYear()}${String(dt.getMonth()+1).padStart(2,'0')}${String(dt.getDate()).padStart(2,'0')}-${String(dt.getHours()).padStart(2,'0')}${String(dt.getMinutes()).padStart(2,'0')}.xlsx`;
+      XLSX.writeFile(wb, name);
+    }catch(e){ console.error(e); alert('Export ไม่สำเร็จ: '+e.message); }
+  }
 </script>
 
 </body>
