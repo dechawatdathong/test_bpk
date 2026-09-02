@@ -2,91 +2,813 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>เวทีรับฟังความคิดเห็น | ลุ่มน้ำบางปะกง</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup v2 — เวทีรับฟังความคิดเห็น ลุ่มน้ำบางปะกง</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F9FB;
+    --card:#FFFFFF;
+    --ink:#1A2B3D;
+    --ink-soft:#5C6E7E;
+    --ink-mute:#8A99AB;
+    --brand:#0F6C8B;
+    --brand-dark:#084961;
+    --brand-light:#E8F3F8;
+    --brand-lighter:#F3F9FC;
+    --accent:#E48A3A;
+    --accent-light:#FDF3E9;
+    --success:#2E9970;
+    --success-light:#E4F5EE;
+    --danger:#C0533A;
+    --danger-light:#FBEDE8;
+    --line:#E4EAF0;
+    --line-strong:#CDD7E1;
+    --shadow-sm:0 1px 2px rgba(15,45,70,0.04), 0 1px 3px rgba(15,45,70,0.06);
+    --shadow-md:0 2px 4px rgba(15,45,70,0.04), 0 6px 20px rgba(15,45,70,0.08);
+    --shadow-lg:0 10px 30px rgba(15,45,70,0.12);
+    --radius-sm:10px;
+    --radius:14px;
+    --radius-lg:20px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'TH Sarabun New','Sarabun',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-weight:400;
+    font-size:20px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    min-height:100vh;
+  }
+  h1,h2,h3,h4{font-family:'TH Sarabun New','Sarabun',sans-serif;font-weight:700;line-height:1.35;}
+  button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+  .wrap{max-width:680px;margin:0 auto;padding:0 20px 96px;}
 
-<!-- Firebase (compat build — works with plain <script> tags, no bundler needed) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  /* ============ HEADER ============ */
+  .header{
+    background:linear-gradient(135deg,#084961 0%,#0F6C8B 55%,#1A8AB0 100%);
+    color:#fff;
+    padding:32px 20px 44px;
+    position:relative;
+    overflow:hidden;
+  }
+  .header::before{
+    content:"";
+    position:absolute;
+    top:-50%;
+    right:-20%;
+    width:400px;height:400px;
+    background:radial-gradient(circle,rgba(228,138,58,0.15) 0%,transparent 60%);
+    pointer-events:none;
+  }
+  .header .wrap{padding:0;position:relative;}
+  .brand-badge{
+    display:inline-block;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#D4EAF3;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:5px 12px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  .header h1{font-size:clamp(26px,6vw,36px);color:#fff;margin-bottom:8px;}
+  .header .subtitle{color:#B4D8E5;font-size:15px;line-height:1.55;max-width:52ch;}
 
-<link rel="stylesheet" href="style.css">
+  /* ============ PROGRESS ============ */
+  .progress-wrap{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:16px 20px;
+    margin:-24px auto 24px;
+    box-shadow:var(--shadow-md);
+    position:relative;
+    z-index:2;
+    max-width:calc(680px - 40px);
+  }
+  .progress-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+    font-size:13px;
+  }
+  .progress-title{font-weight:600;color:var(--brand-dark);}
+  .progress-count{color:var(--ink-soft);}
+  .progress-bar{
+    height:6px;
+    background:var(--line);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg,var(--brand) 0%,var(--accent) 100%);
+    width:25%;
+    border-radius:999px;
+    transition:width .4s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* ============ STEP TABS ============ */
+  .steps{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin-bottom:24px;
+  }
+  .step-btn{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:12px 8px 10px;
+    cursor:pointer;
+    text-align:center;
+    transition:all .2s ease;
+    box-shadow:var(--shadow-sm);
+  }
+  .step-btn:hover{border-color:var(--brand);transform:translateY(-1px);}
+  .step-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(15,108,139,0.25);}
+  .step-btn.done{background:var(--brand-light);border-color:var(--brand);}
+  .step-num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;height:22px;
+    background:var(--brand-light);
+    color:var(--brand);
+    border-radius:50%;
+    font-size:12px;
+    font-weight:700;
+    margin-bottom:4px;
+  }
+  .step-btn.active .step-num{background:rgba(255,255,255,0.25);color:#fff;}
+  .step-btn.done .step-num{background:var(--brand);color:#fff;}
+  .step-label{font-size:15px;font-weight:500;line-height:1.2;}
+
+  /* ============ CARD ============ */
+  .card{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    padding:28px 24px;
+    box-shadow:var(--shadow-md);
+    margin-bottom:16px;
+  }
+  .card + .card{margin-top:0;}
+
+  .q-label{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    color:var(--brand);
+    background:var(--brand-light);
+    padding:3px 10px;
+    border-radius:999px;
+    letter-spacing:0.04em;
+    margin-bottom:10px;
+  }
+  .q-label.live{color:var(--danger);background:var(--danger-light);display:inline-flex;align-items:center;gap:6px;}
+  .q-label.live::before{content:"";width:6px;height:6px;background:var(--danger);border-radius:50%;animation:pulse 1.5s infinite;}
+  @keyframes pulse{50%{opacity:0.3;}}
+  .q-title{font-size:28px;font-weight:700;color:var(--ink);margin-bottom:6px;line-height:1.4;}
+  .q-hint{font-size:19px;color:var(--ink-soft);margin-bottom:18px;line-height:1.5;font-weight:400;}
+
+  .panel{display:none;animation:slideIn .35s cubic-bezier(.4,0,.2,1);}
+  .panel.active{display:block;}
+  @keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ============ INPUTS ============ */
+  .field{margin-bottom:14px;}
+  .field-label{display:block;font-size:13.5px;font-weight:500;color:var(--ink-soft);margin-bottom:6px;}
+  input[type=text],textarea,select{
+    width:100%;
+    background:var(--card);
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:12px 14px;
+    font-size:18px;
+    color:var(--ink);
+    transition:all .15s ease;
+  }
+  input[type=text]:hover,textarea:hover,select:hover{border-color:var(--line-strong);}
+  input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px rgba(15,108,139,0.1);}
+  input::placeholder,textarea::placeholder{color:var(--ink-mute);}
+  textarea{min-height:88px;resize:vertical;line-height:1.55;}
+
+  /* ============ CHOICES ============ */
+  .choices{display:flex;flex-direction:column;gap:8px;}
+  .choices.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .choice{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--card);
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:13px 14px;
+    cursor:pointer;
+    text-align:left;
+    font-size:20px;
+    color:var(--ink);
+    transition:all .15s ease;
+    line-height:1.4;
+  }
+  .choice:hover{border-color:var(--brand);background:var(--brand-lighter);}
+  .choice .icon{
+    width:20px;height:20px;
+    border:2px solid var(--line-strong);
+    border-radius:50%;
+    flex:0 0 auto;
+    position:relative;
+    transition:all .15s ease;
+  }
+  .choice .icon.box{border-radius:6px;}
+  .choice.selected{border-color:var(--brand);background:var(--brand-light);}
+  .choice.selected .icon{border-color:var(--brand);background:var(--brand);}
+  .choice.selected .icon:not(.box)::after{content:"";position:absolute;inset:4px;background:#fff;border-radius:50%;}
+  .choice.selected .icon.box::after{content:"";position:absolute;left:5px;top:1px;width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg);}
+  .choice .text{flex:1;}
+  .choice .code{font-size:11.5px;color:var(--ink-mute);font-weight:500;background:var(--bg);padding:2px 8px;border-radius:6px;flex:0 0 auto;}
+  .choice.selected .code{background:rgba(255,255,255,0.7);color:var(--brand-dark);}
+
+  /* ============ SUB CHOICES ============ */
+  .sub-wrap{
+    margin-top:12px;
+    padding:14px 16px;
+    background:var(--accent-light);
+    border-left:3px solid var(--accent);
+    border-radius:var(--radius-sm);
+  }
+  .sub-wrap p{font-size:13px;color:var(--ink-soft);margin-bottom:8px;font-weight:500;}
+  .sub-check{display:flex;align-items:flex-start;gap:10px;padding:7px 0;cursor:pointer;font-size:17px;color:var(--ink);line-height:1.45;}
+  .sub-check input{margin-top:3px;accent-color:var(--brand);cursor:pointer;}
+  .sub-check b{color:var(--brand-dark);font-weight:600;}
+  .sub-check .desc{color:var(--ink-mute);font-size:12.5px;display:block;margin-top:1px;}
+
+  /* ============ WORD CLOUD ============ */
+  .cloud{
+    background:linear-gradient(135deg,var(--brand-lighter) 0%,#fff 100%);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px 20px;
+    min-height:180px;
+    display:flex;
+    flex-wrap:wrap;
+    align-content:center;
+    justify-content:center;
+    gap:12px 20px;
+    margin-bottom:8px;
+  }
+  .cloud-word{
+    font-family:'TH Sarabun New','Sarabun',sans-serif;
+    font-weight:700;
+    line-height:1;
+    display:inline-block;
+    animation:pop .35s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes pop{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+  .cloud-stat{text-align:center;font-size:13px;color:var(--ink-soft);margin-bottom:0;}
+
+  /* ============ VISION QUOTE ============ */
+  .vision-quote{
+    background:linear-gradient(135deg,var(--brand-dark) 0%,var(--brand) 100%);
+    color:#fff;
+    padding:22px 24px;
+    border-radius:var(--radius);
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .vision-quote::before{
+    content:'"';
+    position:absolute;
+    top:-10px;right:16px;
+    font-family:'Prompt',serif;
+    font-size:96px;
+    color:rgba(255,255,255,0.15);
+    line-height:1;
+  }
+  .vision-quote p{font-size:15.5px;line-height:1.7;font-weight:300;position:relative;z-index:1;}
+
+  /* ============ POLL BARS ============ */
+  .poll-summary{
+    background:var(--brand-lighter);
+    border-radius:var(--radius);
+    padding:18px 20px;
+    margin-top:20px;
+  }
+  .poll-summary-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13px;
+    font-weight:600;
+    color:var(--brand-dark);
+    margin-bottom:14px;
+  }
+  .bar{margin-bottom:12px;}
+  .bar:last-child{margin-bottom:0;}
+  .bar-head{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;color:var(--ink);}
+  .bar-head .val{color:var(--ink-soft);font-weight:500;}
+  .bar-track{height:10px;background:#fff;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,0.04);}
+  .bar-fill{height:100%;border-radius:999px;transition:width .6s cubic-bezier(.4,0,.2,1);}
+  .bar-fill.c1{background:linear-gradient(90deg,var(--brand) 0%,var(--brand-dark) 100%);}
+  .bar-fill.c2{background:linear-gradient(90deg,#4AA5C0 0%,var(--brand) 100%);}
+  .bar-fill.c3{background:linear-gradient(90deg,var(--accent) 0%,#D67328 100%);}
+  .bar-fill.c4{background:linear-gradient(90deg,#C4573C 0%,var(--danger) 100%);}
+
+  /* ============ STRATEGY LIST ============ */
+  .strat-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .strat-item{
+    display:flex;
+    gap:14px;
+    padding:14px 16px;
+    background:var(--brand-lighter);
+    border-radius:var(--radius-sm);
+    border-left:3px solid var(--brand);
+  }
+  .strat-num{
+    font-family:'TH Sarabun New','Sarabun',sans-serif;
+    font-weight:700;
+    color:var(--brand);
+    font-size:28px;
+    line-height:1;
+    flex:0 0 auto;
+    padding-top:2px;
+  }
+  .strat-text{font-size:19px;color:var(--ink);line-height:1.5;}
+  .strat-text b{color:var(--brand-dark);font-weight:700;font-size:21px;display:block;margin-bottom:2px;}
+
+  /* ============ RANKING ============ */
+  .rank-picker{display:flex;flex-direction:column;gap:8px;}
+  .rank-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--card);
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    padding:14px 16px;
+    transition:all .2s ease;
+  }
+  .rank-row.filled{border-color:var(--brand);background:var(--brand-light);}
+  .rank-row.dup{border-color:var(--danger);background:var(--danger-light);}
+  .rank-text{flex:1;font-size:20px;line-height:1.5;color:var(--ink);}
+  .rank-text b{font-size:20px;font-weight:700;color:var(--brand-dark);}
+  .rank-text .strat-desc{font-size:17px;color:var(--ink-soft);margin-top:4px;line-height:1.5;font-weight:400;}
+  .rank-text b{color:var(--brand-dark);font-weight:600;}
+  .rank-select{
+    flex:0 0 auto;
+    width:110px;
+    padding:10px 12px;
+    font-size:17px;
+    font-weight:600;
+    border:1.5px solid var(--line-strong);
+    border-radius:10px;
+    background:#fff;
+    color:var(--brand-dark);
+    cursor:pointer;
+  }
+  .rank-select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(15,108,139,0.1);}
+  .rank-warn{
+    background:var(--danger-light);
+    color:var(--danger);
+    padding:10px 14px;
+    border-radius:var(--radius-sm);
+    font-size:13.5px;
+    font-weight:500;
+    text-align:center;
+  }
+  /* Rank row expandable sub-list */
+  .rank-row-wrap{background:var(--card);border:1.5px solid var(--line);border-radius:var(--radius-sm);transition:all .2s ease;overflow:hidden;}
+  .rank-row-wrap.filled{border-color:var(--brand);}
+  .rank-row-wrap.filled .rank-row-inner{background:var(--brand-light);}
+  .rank-row-wrap.dup{border-color:var(--danger);}
+  .rank-row-wrap.dup .rank-row-inner{background:var(--danger-light);}
+  .rank-row-inner{display:flex;align-items:center;gap:10px;padding:14px 16px;transition:background .2s ease;flex-wrap:wrap;}
+  .rank-row-inner .rank-text{min-width:0;flex:1 1 100%;}
+  @media (min-width:640px){.rank-row-inner .rank-text{flex:1 1 auto;}}
+  .rank-toggle{background:none;border:none;color:var(--brand);font-size:14px;padding:4px 10px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:4px;border-radius:8px;}
+  .rank-toggle:hover{background:rgba(15,108,139,0.08);}
+  .rank-toggle .arrow{transition:transform .2s ease;display:inline-block;}
+  .rank-toggle.open .arrow{transform:rotate(180deg);}
+  .rank-sub{padding:0 16px 14px 16px;display:none;border-top:1px dashed var(--line);margin-top:0;padding-top:12px;}
+  .rank-sub.open{display:block;}
+  .rank-sub p{font-size:14px;color:var(--ink-soft);margin-bottom:8px;font-weight:500;}
+  /* Strategy detail caption */
+  .strat-desc{font-size:17px;color:var(--ink-soft);font-weight:400;margin-top:4px;line-height:1.5;}
+
+  /* ============ BUTTONS ============ */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    background:var(--brand);
+    color:#fff;
+    border:none;
+    border-radius:var(--radius-sm);
+    padding:13px 24px;
+    font-size:18px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+    box-shadow:0 2px 6px rgba(15,108,139,0.2);
+  }
+  .btn:hover{background:var(--brand-dark);box-shadow:0 4px 12px rgba(15,108,139,0.3);transform:translateY(-1px);}
+  .btn:active{transform:translateY(0);}
+  .btn:disabled{background:var(--line-strong);cursor:not-allowed;box-shadow:none;transform:none;}
+  .btn.ghost{background:transparent;color:var(--brand);border:1.5px solid var(--brand);box-shadow:none;}
+  .btn.ghost:hover{background:var(--brand-light);}
+  .btn.accent{background:var(--accent);box-shadow:0 2px 6px rgba(228,138,58,0.25);}
+  .btn.accent:hover{background:#D67328;box-shadow:0 4px 12px rgba(228,138,58,0.35);}
+  .btn.full{width:100%;}
+
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:20px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+  }
+
+  /* ============ COUNTER PILL ============ */
+  .counter-pill{
+    display:inline-block;
+    background:var(--brand-light);
+    color:var(--brand-dark);
+    padding:2px 10px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:600;
+    margin-left:6px;
+  }
+  .counter-pill.warn{background:var(--danger-light);color:var(--danger);}
+
+  /* ============ DONE ============ */
+  .done-msg{
+    background:var(--success-light);
+    color:#1E7051;
+    border-radius:var(--radius);
+    padding:16px 20px;
+    margin-top:16px;
+    font-size:14.5px;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .done-msg .check{
+    width:32px;height:32px;
+    background:var(--success);
+    border-radius:50%;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    flex:0 0 auto;
+  }
+
+  @media (max-width:500px){
+    .choices.grid-2{grid-template-columns:1fr;}
+    .steps{grid-template-columns:repeat(4,1fr);gap:5px;}
+    .step-label{font-size:11px;}
+    .card{padding:22px 18px;}
+    .rank-select{width:88px;}
+  }
+</style>
 </head>
 <body>
 
-  <div class="header">
-    <div class="wrap">
-      <p class="eyebrow-free">เวทีรับฟังความคิดเห็นสาธารณะ</p>
-      <h1>แผนแม่บทการบริหารจัดการทรัพยากรน้ำ<br>ลุ่มน้ำบางปะกง</h1>
-      <p>พิมพ์คำตอบจากโทรศัพท์ของท่านได้เลย ผลลัพธ์จะปรากฏแบบสดให้ทุกคนเห็นพร้อมกัน</p>
-    </div>
-    <svg class="wave" viewBox="0 0 400 40" preserveAspectRatio="none">
-      <path d="M0,20 C50,35 100,5 150,20 C200,35 250,5 300,20 C330,30 370,10 400,20 L400,40 L0,40 Z" fill="#F1F6F6"></path>
-    </svg>
-  </div>
-
+<div class="header">
   <div class="wrap">
-    <div class="tabbar">
-      <button class="tab active" id="tab-btn-cloud" onclick="switchTab('cloud')">คำเดียวที่นึกถึง</button>
-      <button class="tab" id="tab-btn-poll" onclick="switchTab('poll')">ยืนยันวิสัยทัศน์</button>
-    </div>
+    <span class="brand-badge">เวทีรับฟังความคิดเห็น</span>
+    <h1>แผนแม่บทการบริหารจัดการทรัพยากรน้ำลุ่มน้ำบางปะกง</h1>
+  </div>
+</div>
 
-    <!-- ===================== WORD CLOUD PANEL ===================== -->
-    <section class="panel active" id="panel-cloud">
-      <p class="question">เมื่อพูดถึงปัญหาทรัพยากรน้ำในพื้นที่ของท่าน ท่านนึกถึงปัญหาใดมากที่สุด?</p>
+<div class="wrap">
 
-      <div class="input-row">
-        <input type="text" id="word-input" maxlength="30" placeholder="เช่น น้ำท่วม, น้ำแล้ง, น้ำเค็ม..." autocomplete="off">
-        <button class="btn" id="word-submit">ส่งคำตอบ</button>
-      </div>
-      <p class="hint">พิมพ์สั้น ๆ คำเดียวหรือวลีสั้น ๆ ส่งได้หลายครั้ง</p>
-
-      <div class="cloud-frame" id="cloud-frame">
-        <p class="empty-state">ยังไม่มีคำตอบ — เป็นคนแรกที่พิมพ์คำตอบได้เลย</p>
-      </div>
-
-      <div class="meta-row">
-        <span id="cloud-total">ยังไม่มีผู้ตอบ</span>
-        <span class="meta-actions">
-          <button class="reset-link export" onclick="exportCloudExcel()">ส่งออกเป็น Excel</button>
-          <button class="reset-link" onclick="resetData('cloud')">ล้างคำตอบทั้งหมด</button>
-        </span>
-      </div>
-    </section>
-
-    <!-- ===================== POLL PANEL ===================== -->
-    <section class="panel" id="panel-poll">
-      <p class="question">โดยภาพรวม ท่านเห็นด้วยกับร่างวิสัยทัศน์การบริหารจัดการทรัพยากรน้ำลุ่มน้ำบางปะกงในระดับใด?</p>
-
-      <div class="options" id="poll-options" role="radiogroup"></div>
-
-      <div class="feedback-wrap" id="feedback-wrap">
-        <textarea id="feedback-text" maxlength="500" placeholder="ท่านคิดว่าควรปรับปรุงส่วนใด? (ไม่บังคับ)"></textarea>
-      </div>
-
-      <div class="poll-actions">
-        <button class="btn btn-full" id="poll-submit" disabled>ส่งคำตอบ</button>
-      </div>
-      <div id="voted-note" style="display:none" class="voted-note">บันทึกคำตอบของท่านแล้ว ขอบคุณที่ร่วมแสดงความคิดเห็น</div>
-
-      <div class="results">
-        <h3>ผลรวมแบบสด</h3>
-        <div id="poll-results"></div>
-      </div>
-
-      <div class="meta-row">
-        <span id="poll-total">ยังไม่มีผู้ลงคะแนน</span>
-        <span class="meta-actions">
-          <button class="reset-link export" onclick="exportPollExcel()">ส่งออกเป็น Excel</button>
-          <button class="reset-link" onclick="resetData('poll')">ล้างคำตอบทั้งหมด</button>
-        </span>
-      </div>
-    </section>
+  <!-- STEP TABS -->
+  <div class="steps" style="margin-top:-24px;position:relative;z-index:2;">
+    <button class="step-btn active" data-tab="1" onclick="go(1)"><div class="step-num">1</div><div class="step-label">สภาพปัญหา</div></button>
+    <button class="step-btn" data-tab="2" onclick="go(2)"><div class="step-num">2</div><div class="step-label">วิสัยทัศน์</div></button>
+    <button class="step-btn" data-tab="3" onclick="go(3)"><div class="step-num">3</div><div class="step-label">ยุทธศาสตร์</div></button>
+    <button class="step-btn" data-tab="4" onclick="go(4)"><div class="step-num">4</div><div class="step-label">แนวทางพัฒนา</div></button>
   </div>
 
-<script src="script.js"></script>
+  <!-- ==================== TAB 1 ==================== -->
+  <section class="panel active" data-panel="1">
+
+    <div class="card">
+      <span class="q-label">คำถาม 1.1</span>
+      <h3 class="q-title">ท่านอยู่หรือใช้ประโยชน์จากลุ่มน้ำสายใด?</h3>
+      <p class="q-hint">เลือกลุ่มน้ำหลักที่เกี่ยวข้องกับท่านมากที่สุด</p>
+      <div class="choices">
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">คลองพระสะทึง</span><span class="code">1501 · เวทีที่ 3</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำพระปรงส่วนที่ 1</span><span class="code">1502 · เวทีที่ 2</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำพระปรงส่วนที่ 2</span><span class="code">1503 · เวทีที่ 2</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำหนุมาน</span><span class="code">1504 · เวทีที่ 2</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำปราจีนบุรีตอนล่าง</span><span class="code">1505 · เวทีที่ 1</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำนครนายก</span><span class="code">1506 · เวทีที่ 1</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">ที่ราบแม่น้ำบางปะกงส่วนที่ 1</span><span class="code">1507 · เวทีที่ 5</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">คลองท่าลาด</span><span class="code">1508 · เวทีที่ 4</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">คลองหลวง</span><span class="code">1509 · เวทีที่ 5</span></button>
+        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">ที่ราบแม่น้ำบางปะกงส่วนที่ 2</span><span class="code">1510 · เวทีที่ 5</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="q-label">คำถาม 1.2</span>
+      <h3 class="q-title">ปัญหาเรื่องน้ำที่สำคัญที่สุดในปัจจุบันคืออะไร?</h3>
+      <p class="q-hint">พิมพ์สั้นๆ 1 คำ เช่น น้ำท่วม น้ำแล้ง น้ำเค็ม (ส่งได้หลายครั้ง)</p>
+      <div class="field" style="display:flex;gap:8px;">
+        <input type="text" id="word-input" maxlength="30" placeholder="พิมพ์ปัญหาน้ำในพื้นที่ของท่าน...">
+        <button class="btn" onclick="mockWord()">ส่ง</button>
+      </div>
+      <div class="field">
+        <label class="field-label">บริเวณ (ไม่บังคับ)</label>
+        <input type="text" placeholder="หมู่/ตำบล/อำเภอ/จังหวัด">
+      </div>
+      <div class="cloud" id="cloud">
+        <span class="cloud-word" style="font-size:42px;color:var(--brand-dark);">น้ำท่วม</span>
+        <span class="cloud-word" style="font-size:32px;color:var(--brand);">น้ำแล้ง</span>
+        <span class="cloud-word" style="font-size:28px;color:var(--accent);">น้ำเค็ม</span>
+        <span class="cloud-word" style="font-size:22px;color:#1A8AB0;">น้ำเสีย</span>
+        <span class="cloud-word" style="font-size:20px;color:var(--brand);">ประปา</span>
+        <span class="cloud-word" style="font-size:18px;color:var(--accent);">แย่งน้ำ</span>
+        <span class="cloud-word" style="font-size:17px;color:var(--brand-dark);">น้ำไม่พอ</span>
+      </div>
+      <p class="cloud-stat">คำตอบทั้งหมด <b>142</b> รายการ · <b>7</b> คำ</p>
+    </div>
+
+    <div class="card">
+      <span class="q-label">คำถาม 1.3</span>
+      <h3 class="q-title">ประเด็นที่ท่านกังวลมากที่สุดเกี่ยวกับอนาคตของลุ่มน้ำ</h3>
+      <p class="q-hint">เลือกได้หลายข้อ</p>
+      <div class="choices">
+        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">น้ำกินน้ำใช้</span></button>
+        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">น้ำเพื่อการเกษตรและอาชีพ</span></button>
+        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">น้ำท่วมและภัยแล้ง</span></button>
+        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">ทรัพยากรธรรมชาติและสิ่งแวดล้อม</span></button>
+        <button class="choice" onclick="pickCheck(this)"><span class="icon box"></span><span class="text">การบริหารจัดการน้ำ</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="q-label">คำถาม 1.4</span>
+      <h3 class="q-title">ในพื้นที่มีปัญหาความขัดแย้งด้านการใช้น้ำหรือไม่?</h3>
+      <div class="choices">
+        <button class="choice" onclick="pickRadio(this);toggleSub('conflict-sub',false)"><span class="icon"></span><span class="text">ไม่มี</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('conflict-sub',true)"><span class="icon"></span><span class="text">เคยเกิดขึ้นแล้ว</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('conflict-sub',false)"><span class="icon"></span><span class="text">ยังไม่เกิด แต่มีแนวโน้มในอนาคต</span></button>
+      </div>
+      <div class="sub-wrap" id="conflict-sub" style="display:none;">
+        <p>ระหว่างใครกับใคร? (เลือกได้หลายข้อ)</p>
+        <label class="sub-check"><input type="checkbox"><span><b>ประชาชน – ประชาชน</b><span class="desc">เช่น หมู่บ้านต้นน้ำ vs ปลายน้ำ แย่งน้ำ</span></span></label>
+        <label class="sub-check"><input type="checkbox"><span><b>ประชาชน – ภาครัฐ</b><span class="desc">เช่น ชาวบ้านค้านโครงการรัฐ</span></span></label>
+        <label class="sub-check"><input type="checkbox"><span><b>ประชาชน – ภาคเอกชน</b><span class="desc">เช่น ชาวบ้าน vs โรงงาน</span></span></label>
+        <label class="sub-check"><input type="checkbox"><span><b>ภาครัฐ – ภาครัฐ</b><span class="desc">เช่น 2 หน่วยงานรัฐทำงานทับซ้อน</span></span></label>
+        <label class="sub-check"><input type="checkbox"><span><b>ภาครัฐ – ภาคเอกชน</b><span class="desc">เช่น รัฐควบคุมบริษัทใช้น้ำ</span></span></label>
+        <label class="sub-check"><input type="checkbox"><span><b>ภาคเอกชน – ภาคเอกชน</b><span class="desc">เช่น 2 โรงงานแย่งน้ำ</span></span></label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <span></span>
+      <button class="btn" onclick="go(2)">ถัดไป →</button>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 2 ==================== -->
+  <section class="panel" data-panel="2">
+    <div class="card">
+      <span class="q-label">คำถาม 2</span>
+      <h3 class="q-title">ร่างวิสัยทัศน์ลุ่มน้ำบางปะกง</h3>
+      <div class="vision-quote">
+        <p>ทรัพยากรน้ำมั่นคงและยั่งยืน จัดสรรอย่างเป็นธรรมรองรับเศรษฐกิจและ EEC ยืดหยุ่นต่อภัยพิบัติและการเปลี่ยนแปลงสภาพภูมิอากาศ ฟื้นฟูระบบนิเวศอย่างสมดุล ภายใต้การบริหารจัดการแบบบูรณาการและการมีส่วนร่วมของทุกภาคส่วน</p>
+      </div>
+      <p class="q-hint" style="margin-bottom:14px;font-weight:500;color:var(--ink);">ท่านเห็นด้วยกับร่างวิสัยทัศน์นี้ระดับใด?</p>
+      <div class="choices">
+        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วยอย่างยิ่ง</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">เห็นด้วย</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',true)"><span class="icon"></span><span class="text">เห็นด้วย แต่ควรปรับปรุงบางส่วน</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('vision-feedback',false)"><span class="icon"></span><span class="text">ไม่เห็นด้วย</span></button>
+      </div>
+      <div class="sub-wrap" id="vision-feedback" style="display:none;">
+        <p>ท่านคิดว่าควรปรับปรุงส่วนใด?</p>
+        <textarea placeholder="พิมพ์ข้อเสนอแนะที่นี่..."></textarea>
+      </div>
+
+      <div class="poll-summary">
+        <div class="poll-summary-title"><span>ผลรวมแบบสด</span><span>87 คน</span></div>
+        <div class="bar"><div class="bar-head"><span>เห็นด้วยอย่างยิ่ง</span><span class="val">32 · 37%</span></div><div class="bar-track"><div class="bar-fill c1" style="width:37%"></div></div></div>
+        <div class="bar"><div class="bar-head"><span>เห็นด้วย</span><span class="val">28 · 32%</span></div><div class="bar-track"><div class="bar-fill c2" style="width:32%"></div></div></div>
+        <div class="bar"><div class="bar-head"><span>เห็นด้วย แต่ควรปรับปรุง</span><span class="val">19 · 22%</span></div><div class="bar-track"><div class="bar-fill c3" style="width:22%"></div></div></div>
+        <div class="bar"><div class="bar-head"><span>ไม่เห็นด้วย</span><span class="val">8 · 9%</span></div><div class="bar-track"><div class="bar-fill c4" style="width:9%"></div></div></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn ghost" onclick="go(1)">← กลับ</button>
+      <button class="btn" onclick="go(3)">ถัดไป →</button>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 3 ==================== -->
+  <section class="panel" data-panel="3">
+    <div class="card">
+      <span class="q-label">คำถาม 3.1</span>
+      <h3 class="q-title">ร่างประเด็นยุทธศาสตร์ของลุ่มน้ำ</h3>
+      <p class="q-hint">พิจารณายุทธศาสตร์ทั้ง 5 ด้าน แล้วให้ความเห็น</p>
+      <div class="strat-list">
+        <div class="strat-item"><div class="strat-num">1</div><div class="strat-text"><b>การจัดการน้ำอุปโภค-บริโภคอย่างทั่วถึงและเป็นธรรม</b><div class="strat-desc">ให้ทุกครัวเรือนเข้าถึงน้ำสะอาดพอเพียง ประปาหมู่บ้านและ กปภ. ครอบคลุมทั้งเขตเมืองและชนบท</div></div></div>
+        <div class="strat-item"><div class="strat-num">2</div><div class="strat-text"><b>การจัดสรรน้ำเพื่อการผลิตอย่างเป็นธรรมและยืดหยุ่นต่อสภาพภูมิอากาศ</b><div class="strat-desc">รองรับภาคเกษตร-อุตสาหกรรม-EEC ให้ใช้น้ำอย่างสมดุล ปรับตัวได้ในภาวะแล้ง/ท่วม</div></div></div>
+        <div class="strat-item"><div class="strat-num">3</div><div class="strat-text"><b>การจัดการภัยพิบัติทางน้ำและการปรับตัวต่อการเปลี่ยนแปลงสภาพภูมิอากาศ</b><div class="strat-desc">เตือนภัย ระบายน้ำ ป้องกันน้ำท่วม-แล้ง-เค็มรุก และรับมือ Climate Change</div></div></div>
+        <div class="strat-item"><div class="strat-num">4</div><div class="strat-text"><b>การฟื้นฟูระบบนิเวศและลดผลกระทบสะสมทางด้านสิ่งแวดล้อม</b><div class="strat-desc">ฟื้นฟูป่าต้นน้ำ ควบคุมมลพิษ บำบัดน้ำเสีย รักษาระบบนิเวศแม่น้ำ-ป่าชายเลน</div></div></div>
+        <div class="strat-item"><div class="strat-num">5</div><div class="strat-text"><b>การยกระดับธรรมาภิบาลและการบริหารจัดการน้ำเชื่อมโยงข้ามลุ่มน้ำ</b><div class="strat-desc">บูรณาการหน่วยงาน กระจายอำนาจ ให้ อปท./ชุมชน มีส่วนร่วมในการตัดสินใจ</div></div></div>
+      </div>
+      <div class="choices">
+        <button class="choice" onclick="pickRadio(this);toggleSub('strategy-add',false)"><span class="icon"></span><span class="text">มีความเหมาะสมแล้ว</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('strategy-add',true)"><span class="icon"></span><span class="text">ควรเพิ่มเติมประเด็น...</span></button>
+      </div>
+      <div class="sub-wrap" id="strategy-add" style="display:none;">
+        <p>ประเด็นที่ควรเพิ่ม?</p>
+        <textarea placeholder="พิมพ์ประเด็นที่ต้องการเพิ่ม..."></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="q-label">คำถาม 3.2</span>
+      <h3 class="q-title">เรียงลำดับความสำคัญของยุทธศาสตร์</h3>
+      <p class="q-hint">ใส่เลข 1 = สำคัญที่สุด ถึง 5 = สำคัญน้อยที่สุด</p>
+      <div class="rank-picker" data-max="5">
+        <div class="rank-row"><div class="rank-text">ด้านที่ 1 การจัดการน้ำอุปโภค-บริโภค</div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><div class="rank-text">ด้านที่ 2 การจัดสรรน้ำเพื่อการผลิต</div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><div class="rank-text">ด้านที่ 3 การจัดการภัยพิบัติทางน้ำ</div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><div class="rank-text">ด้านที่ 4 การฟื้นฟูระบบนิเวศ</div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-row"><div class="rank-text">ด้านที่ 5 การยกระดับธรรมาภิบาล</div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="rank-warn" style="display:none;">มีอันดับซ้ำกัน กรุณาแก้ไข</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn ghost" onclick="go(2)">← กลับ</button>
+      <button class="btn" onclick="go(4)">ถัดไป →</button>
+    </div>
+  </section>
+
+  <!-- ==================== TAB 4 ==================== -->
+  <section class="panel" data-panel="4">
+    <div class="card">
+      <span class="q-label">คำถาม 4.1</span>
+      <h3 class="q-title">ทางเลือกการพัฒนาลุ่มน้ำ</h3>
+      <p class="q-hint">ใส่เลข 1 = เหมาะสมที่สุด ถึง 4 = เหมาะสมน้อยที่สุด</p>
+      <div class="rank-picker" data-max="4">
+        <div class="rank-row-wrap">
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 0 คงสภาพเดิม (BAU)</b><div class="strat-desc">คงการดำเนินงานตามแผนงานเดิมโดยไม่ปรับเปลี่ยนเชิงยุทธศาสตร์ (ปัญหาต้นน้ำ-กลางน้ำ-ปลายน้ำยังคงอยู่ น้ำเค็มรุก ประปาหมู่บ้านขาดน้ำ ระบบข้อมูลแยกส่วน)</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+        </div>
+        <div class="rank-row-wrap">
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 1 เน้นโครงสร้างพื้นฐานและเพิ่มน้ำต้นทุน</b><div class="strat-desc">ลงทุนเชิงกายภาพและสิ่งก่อสร้าง เช่น อ่างเก็บน้ำ ฝาย ประตูระบายน้ำ ขุดลอกลำน้ำ ขยายท่อส่ง สถานีสูบน้ำ คันกั้นน้ำทะเล บ่อบาดาล</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+        </div>
+        <div class="rank-row-wrap">
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 2 บริหารเชิงนิเวศและนวัตกรรมเทคโนโลยี</b><div class="strat-desc">ฟื้นฟูระบบนิเวศธรรมชาติร่วมกับเทคโนโลยีใหม่ (NBS/EBa ป่าต้นน้ำ, Reuse น้ำเสีย, แก้มลิงธรรมชาติ, เซนเซอร์ความเค็ม, ป่าชายเลน, เกษตรแม่นยำ, ระบบเตือนภัย real-time)</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+        </div>
+        <div class="rank-row-wrap">
+          <div class="rank-row-inner"><div class="rank-text"><b>ทางเลือกที่ 3 ยกระดับธรรมาภิบาลและชุมชนมีส่วนร่วม</b><div class="strat-desc">ปรับปรุงโครงสร้างสถาบัน กฎหมาย กระจายอำนาจให้ท้องถิ่น ผ่านข้อตกลงป่าชุมชน องค์กรผู้ใช้น้ำ อปท. คณะกรรมการลุ่มน้ำ และแพลตฟอร์มรับฟังความคิดเห็น</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+        </div>
+        <div class="rank-warn" style="display:none;">มีอันดับซ้ำกัน กรุณาแก้ไข</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="q-label">คำถาม 4.2</span>
+      <h3 class="q-title">เกณฑ์พิจารณาแนวทางพัฒนา</h3>
+      <p class="q-hint">ใส่เลข 1 = สำคัญที่สุด ถึง 3 = สำคัญน้อยที่สุด</p>
+      <div class="rank-picker" data-max="3">
+        <div class="rank-row-wrap">
+          <div class="rank-row-inner"><div class="rank-text"><b>มิติด้านเศรษฐกิจ</b><div class="strat-desc">ประสิทธิภาพการบริหารจัดการทรัพยากรน้ำและความคุ้มค่า เช่น ลดการสูญเสียน้ำในท่อ เพิ่มผลิตภาพน้ำ รีไซเคิลน้ำอุตสาหกรรม บริหารอ่างเก็บน้ำแบบพลวัต ป้องกันอุทกภัยต่อพื้นที่เศรษฐกิจ</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option></select></div>
+        </div>
+        <div class="rank-row-wrap">
+          <div class="rank-row-inner"><div class="rank-text"><b>มิติด้านสังคม</b><div class="strat-desc">การเข้าถึงทรัพยากรน้ำอย่างเท่าเทียม ธรรมาภิบาล การมีส่วนร่วม เช่น น้ำประปาชนบท ชุมชนร่วมจัดการน้ำ ไกล่เกลี่ยข้อพิพาท เตือนภัยล่วงหน้า บูรณาการแผน+งบประมาณ</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option></select></div>
+        </div>
+        <div class="rank-row-wrap">
+          <div class="rank-row-inner"><div class="rank-text"><b>มิติสิ่งแวดล้อม</b><div class="strat-desc">รักษาสมดุลของระบบนิเวศ ควบคุมมลพิษ ปกป้องทรัพยากรธรรมชาติ เช่น ฟื้นฟูป่าต้นน้ำ บำบัดน้ำเสีย ควบคุมน้ำเค็มรุก ป้องกันการชะล้างพังทลายหน้าดินริมน้ำ</div></div><select class="rank-select"><option value="">เลือก</option><option>1</option><option>2</option><option>3</option></select></div>
+        </div>
+        <div class="rank-warn" style="display:none;">มีอันดับซ้ำกัน กรุณาแก้ไข</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="q-label">คำถาม 4.3</span>
+      <h3 class="q-title">แผนงาน/โครงการที่ควรทำมากที่สุด <span class="counter-pill" id="plan-counter">0 / 3</span></h3>
+      <p class="q-hint">เลือกได้ไม่เกิน 3 ข้อ</p>
+      <div class="choices grid-2" id="plans">
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">ปรับปรุงระบบประปา</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">ส่งเสริมใช้น้ำประหยัด</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">พัฒนาแหล่งเก็บกักน้ำ</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">แหล่งน้ำชุมชนขนาดเล็ก</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">พัฒนาระบบชลประทาน</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">ระบบระบายน้ำ/ป้องกันท่วม</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">ฟื้นฟูป่าต้นน้ำ/พื้นที่ชุ่มน้ำ</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">ขุดลอกลำน้ำ/กำจัดตะกอน</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">ระบบเตือนภัยน้ำท่วม/แล้ง</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">บูรณาการหน่วยงานรัฐ</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">พัฒนาแนวทางกฎหมาย</span></button>
+        <button class="choice" onclick="pickPlan(this)"><span class="icon box"></span><span class="text">อื่น ๆ (พิมพ์เพิ่ม)</span></button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn ghost" onclick="go(3)">← กลับ</button>
+      <button class="btn accent" onclick="submitAll()">ส่งคำตอบทั้งหมด</button>
+    </div>
+    <div id="done" class="done-msg" style="display:none;">
+      <div class="check">✓</div>
+      <div>บันทึกคำตอบของท่านแล้ว ขอบคุณที่ร่วมแสดงความคิดเห็น</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  function go(n){
+    document.querySelectorAll('.step-btn').forEach(t=>{
+      t.classList.remove('active','done');
+      if(t.dataset.tab==n) t.classList.add('active');
+      else if(t.dataset.tab<n) t.classList.add('done');
+    });
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.dataset.panel==n));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function pickRadio(el){
+    el.parentElement.querySelectorAll('.choice').forEach(o=>o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+  function pickCheck(el){el.classList.toggle('selected');}
+  function pickPlan(el){
+    const picked = document.querySelectorAll('#plans .choice.selected').length;
+    if(!el.classList.contains('selected') && picked >= 3) return;
+    el.classList.toggle('selected');
+    const count = document.querySelectorAll('#plans .choice.selected').length;
+    const pill = document.getElementById('plan-counter');
+    pill.textContent = count + ' / 3';
+    pill.classList.toggle('warn', count===3);
+  }
+  function toggleSub(id, show){
+    const el = document.getElementById(id);
+    el.style.display = show ? 'block' : 'none';
+  }
+  function mockWord(){
+    const val = document.getElementById('word-input').value.trim();
+    if(!val) return;
+    const cloud = document.getElementById('cloud');
+    const s = document.createElement('span');
+    s.className = 'cloud-word';
+    s.style.fontSize = '22px';
+    s.style.color = 'var(--brand)';
+    s.textContent = val;
+    cloud.appendChild(s);
+    document.getElementById('word-input').value = '';
+  }
+  function submitAll(){
+    const d = document.getElementById('done');
+    d.style.display = 'flex';
+    d.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  function toggleSubList(btn){
+    const wrap = btn.closest('.rank-row-wrap') || btn.closest('.rank-row');
+    const sub = wrap.querySelector('.rank-sub');
+    const isOpen = sub.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+  }
+  document.querySelectorAll('.rank-picker').forEach(picker=>{
+    const selects = picker.querySelectorAll('.rank-select');
+    const warn = picker.querySelector('.rank-warn');
+    selects.forEach(sel=>{
+      sel.addEventListener('change', ()=>{
+        const values = [...selects].map(s=>s.value).filter(Boolean);
+        const dups = new Set(values.filter((v,i,a)=>a.indexOf(v)!==i));
+        selects.forEach(s=>{
+          const row = s.closest('.rank-row-wrap') || s.closest('.rank-row');
+          row.classList.toggle('filled', !!s.value && !dups.has(s.value));
+          row.classList.toggle('dup', dups.has(s.value));
+        });
+        warn.style.display = dups.size ? 'block' : 'none';
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
