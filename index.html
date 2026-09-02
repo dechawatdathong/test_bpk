@@ -515,6 +515,29 @@
   .admin-table tbody tr:hover{background:var(--brand-lighter);}
   .admin-empty{text-align:center;color:var(--ink-mute);padding:30px 20px;font-size:16px;}
   .admin-note{background:var(--accent-light);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;font-size:14px;color:var(--ink-soft);margin-top:12px;}
+  /* Validation error state */
+  .err-highlight{animation:shake .4s;border-color:var(--danger) !important;background:var(--danger-light) !important;}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+  .err-toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:12px 20px;border-radius:12px;box-shadow:var(--shadow-lg);z-index:1000;font-size:16px;font-weight:500;animation:slidedown .3s;max-width:90vw;text-align:center;}
+  @keyframes slidedown{from{transform:translate(-50%,-20px);opacity:0;}to{transform:translate(-50%,0);opacity:1;}}
+  /* Success fullscreen */
+  #success-overlay{position:fixed;inset:0;background:linear-gradient(135deg,var(--success) 0%,#1E7051 100%);color:#fff;display:none;align-items:center;justify-content:center;z-index:2000;padding:20px;}
+  #success-overlay.show{display:flex;animation:fadeIn .4s;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .success-inner{text-align:center;max-width:500px;}
+  .success-check{width:120px;height:120px;background:#fff;color:var(--success);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:64px;margin-bottom:24px;animation:pop2 .5s cubic-bezier(.34,1.56,.64,1);}
+  @keyframes pop2{from{transform:scale(0);}to{transform:scale(1);}}
+  .success-inner h1{font-size:36px;color:#fff;margin-bottom:12px;}
+  .success-inner p{font-size:20px;color:rgba(255,255,255,0.9);margin-bottom:24px;line-height:1.5;}
+  /* Admin aggregation section */
+  .agg-list{display:flex;flex-direction:column;gap:6px;}
+  .agg-row{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--brand-lighter);border-radius:8px;font-size:15px;}
+  .agg-row .label{flex:1;color:var(--ink);}
+  .agg-row .bar-mini{width:80px;height:6px;background:var(--line);border-radius:999px;overflow:hidden;}
+  .agg-row .bar-mini > div{height:100%;background:var(--brand);border-radius:999px;}
+  .agg-row .count{font-weight:600;color:var(--brand-dark);min-width:36px;text-align:right;}
+  .admin-cloud{background:var(--brand-lighter);border-radius:var(--radius);padding:20px;min-height:120px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px 18px;text-align:center;}
+  .admin-cloud .cloud-word{font-family:'TH Sarabun New','Sarabun',sans-serif;font-weight:700;}
 </style>
 </head>
 <body>
@@ -758,14 +781,18 @@
       <button class="btn ghost" onclick="go(3)">← กลับ</button>
       <button class="btn accent" onclick="submitAll()">ส่งคำตอบทั้งหมด</button>
     </div>
-    <div id="done" class="done-msg" style="display:none;">
-      <div class="check">✓</div>
-      <div>บันทึกคำตอบของท่านแล้ว ขอบคุณที่ร่วมแสดงความคิดเห็น</div>
-    </div>
   </section>
 
 </div>
 </div><!-- /#main-view -->
+
+<div id="success-overlay">
+  <div class="success-inner">
+    <div class="success-check">✓</div>
+    <h1>ส่งแบบสอบถามเสร็จแล้ว</h1>
+    <p>ขอบคุณที่ร่วมแสดงความคิดเห็นในเวทีรับฟังความคิดเห็นลุ่มน้ำบางปะกง<br>ข้อมูลของท่านจะถูกนำไปพัฒนาแผนแม่บทต่อไป</p>
+  </div>
+</div>
 
 <div id="admin-view">
   <div class="admin-header">
@@ -805,6 +832,31 @@
     </div>
 
     <div class="admin-section">
+      <h2>เวิร์ดคลาวด์ (realtime)</h2>
+      <div class="admin-cloud" id="admin-cloud"><p class="admin-empty" style="padding:20px 0;">ยังไม่มีคำตอบ</p></div>
+    </div>
+
+    <div class="admin-section">
+      <h2>สรุปตามลุ่มน้ำ (realtime)</h2>
+      <div class="agg-list" id="agg-basin"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+    </div>
+
+    <div class="admin-section">
+      <h2>ประเด็นที่คนกังวล (1.3)</h2>
+      <div class="agg-list" id="agg-concerns"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+    </div>
+
+    <div class="admin-section">
+      <h2>ความขัดแย้ง (1.4)</h2>
+      <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+    </div>
+
+    <div class="admin-section">
+      <h2>แผนงานยอดนิยม (4.3)</h2>
+      <div class="agg-list" id="agg-plans"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+    </div>
+
+    <div class="admin-section">
       <h2>รายการตอบล่าสุด (10 อันล่าสุด)</h2>
       <div id="recent-list"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
     </div>
@@ -815,6 +867,24 @@
 
 <script>
   function go(n){
+    const cur = document.querySelector('.panel.active');
+    const curN = parseInt(cur?.dataset.panel || '1');
+    // Validate forward navigation
+    if(n > curN){
+      for(let i = curN; i < n; i++){
+        const errs = validatePanel(i);
+        if(errs.length){
+          showToast('กรุณากรอกให้ครบก่อนไปหน้าถัดไป');
+          highlightErrors(errs);
+          if(i !== curN){ actuallyGo(i); return; }
+          return;
+        }
+      }
+    }
+    clearErrors();
+    actuallyGo(n);
+  }
+  function actuallyGo(n){
     document.querySelectorAll('.step-btn').forEach(t=>{
       t.classList.remove('active','done');
       if(t.dataset.tab==n) t.classList.add('active');
@@ -822,6 +892,78 @@
     });
     document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.dataset.panel==n));
     window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function validatePanel(n){
+    const errs = [];
+    const panel = document.querySelector(`[data-panel="${n}"]`);
+    if(!panel) return errs;
+    if(n===1){
+      const cards = panel.querySelectorAll('.card');
+      if(!cards[0].querySelector('.choice.selected')) errs.push(cards[0]);
+      // 1.2 area (word cloud is optional aggregate, area is required)
+      const area = cards[1].querySelector('#area-input');
+      if(area && !area.value.trim()) errs.push(area);
+      if(!cards[2].querySelectorAll('.choice.selected').length) errs.push(cards[2]);
+      const cb = cards[3].querySelector('.choices .choice.selected');
+      if(!cb) errs.push(cards[3].querySelector('.choices'));
+      else{
+        const idx = [...cb.parentElement.children].indexOf(cb);
+        if(idx===1 && !cards[3].querySelectorAll('.sub-check input:checked').length) errs.push(cards[3].querySelector('#conflict-sub'));
+      }
+    }
+    else if(n===2){
+      const vb = panel.querySelector('#vision-choices .choice.selected');
+      if(!vb) errs.push(panel.querySelector('#vision-choices'));
+      else if(vb.dataset.vkey==='improve'){
+        const ta = panel.querySelector('#vision-feedback textarea');
+        if(!ta.value.trim()) errs.push(ta);
+      }
+    }
+    else if(n===3){
+      const sb = panel.querySelector('.choices .choice.selected');
+      if(!sb) errs.push(panel.querySelector('.choices'));
+      else{
+        const idx = [...sb.parentElement.children].indexOf(sb);
+        if(idx===1){
+          const ta = panel.querySelector('#strategy-add textarea');
+          if(!ta.value.trim()) errs.push(ta);
+        }
+      }
+      const picker = panel.querySelectorAll('.rank-picker')[0];
+      const selects = picker.querySelectorAll('.rank-select');
+      const vals = [...selects].map(s=>s.value);
+      if(vals.some(v=>!v)) selects.forEach(s=>{ if(!s.value) errs.push(s.closest('.rank-row-wrap')||s.closest('.rank-row')); });
+      const dups = new Set(vals.filter((v,i,a)=>v&&a.indexOf(v)!==i));
+      if(dups.size) selects.forEach(s=>{ if(dups.has(s.value)) errs.push(s.closest('.rank-row-wrap')||s.closest('.rank-row')); });
+    }
+    else if(n===4){
+      const pickers = panel.querySelectorAll('.rank-picker');
+      pickers.forEach(p=>{
+        const sels = p.querySelectorAll('.rank-select');
+        const vals = [...sels].map(s=>s.value);
+        if(vals.some(v=>!v)) sels.forEach(s=>{ if(!s.value) errs.push(s.closest('.rank-row-wrap')); });
+        const dups = new Set(vals.filter((v,i,a)=>v&&a.indexOf(v)!==i));
+        if(dups.size) sels.forEach(s=>{ if(dups.has(s.value)) errs.push(s.closest('.rank-row-wrap')); });
+      });
+      if(!panel.querySelectorAll('#plans .choice.selected').length) errs.push(panel.querySelector('#plans'));
+    }
+    return errs;
+  }
+  function highlightErrors(errs){
+    errs.forEach(el=>{ if(el){ el.classList.add('err-highlight'); setTimeout(()=>el.classList.remove('err-highlight'),2000); }});
+    if(errs[0]) errs[0].scrollIntoView({behavior:'smooth', block:'center'});
+  }
+  function clearErrors(){document.querySelectorAll('.err-highlight').forEach(e=>e.classList.remove('err-highlight'));}
+  let toastTimer;
+  function showToast(msg){
+    let t = document.querySelector('.err-toast');
+    if(t) t.remove();
+    t = document.createElement('div');
+    t.className = 'err-toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.remove(), 2600);
   }
   function pickRadio(el){
     el.parentElement.querySelectorAll('.choice').forEach(o=>o.classList.remove('selected'));
@@ -866,12 +1008,13 @@
 
   /* ==================== FIREBASE + DATA ==================== */
   const firebaseConfig = {
-    apiKey: "AIzaSyCPMeZuwO_5360YBU4hpfFhnyDumaCVsCU",
-    authDomain: "tesco-web-app.firebaseapp.com",
-    projectId: "tesco-web-app",
-    storageBucket: "tesco-web-app.firebasestorage.app",
-    messagingSenderId: "373186748503",
-    appId: "1:373186748503:web:ee22c8b71f69c69eaac312"
+    apiKey: "AIzaSyBeQixUIJ87QrOe-X52yOwR1k2EMQNVu1M",
+    authDomain: "test-91dac.firebaseapp.com",
+    projectId: "test-91dac",
+    storageBucket: "test-91dac.firebasestorage.app",
+    messagingSenderId: "990282892464",
+    appId: "1:990282892464:web:d72fe2bc33623e269de775",
+    measurementId: "G-JR88GEND2K"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -992,20 +1135,27 @@
   }
 
   async function submitAll(){
+    // Validate all panels 1-4 before submit
+    for(let i=1;i<=4;i++){
+      const errs = validatePanel(i);
+      if(errs.length){
+        showToast('กรุณากรอกให้ครบทุกข้อในหน้า '+i);
+        actuallyGo(i);
+        highlightErrors(errs);
+        return;
+      }
+    }
     const btn = event?.currentTarget;
     if(btn) btn.disabled = true;
     try{
       const data = collectData();
       await responsesRef.add({...data, ts: serverTimestamp()});
-      // Update vision poll aggregate
       if(data.vision){
         const upd = { votes: { [data.vision]: increment(1) } };
         if(data.vision === 'improve' && data.vision_comment) upd.feedback = arrayUnion(data.vision_comment);
         await pollRef.set(upd, {merge:true});
       }
-      document.getElementById('done').style.display = 'flex';
-      document.getElementById('done').scrollIntoView({behavior:'smooth', block:'center'});
-      if(btn) btn.textContent = 'ส่งแล้ว ขอบคุณ';
+      document.getElementById('success-overlay').classList.add('show');
     }catch(e){
       console.error(e);
       alert('บันทึกไม่สำเร็จ: '+e.message);
@@ -1022,17 +1172,63 @@
   function initAdmin(){
     responsesRef.orderBy('ts','desc').onSnapshot(snap=>{
       document.getElementById('stat-responses').textContent = snap.size;
+      const all = snap.docs.map(d=>d.data());
       renderRecent(snap.docs.slice(0,10));
+      renderAggregations(all);
     }, err=>console.error('resp err:',err));
     cloudRef.onSnapshot(doc=>{
       const w = doc.exists ? (doc.data().words || {}) : {};
       document.getElementById('stat-words').textContent = Object.keys(w).length;
       document.getElementById('stat-word-total').textContent = Object.values(w).reduce((s,c)=>s+c,0);
+      renderAdminCloud(w);
     });
     pollRef.onSnapshot(doc=>{
       const v = doc.exists ? (doc.data().votes || {}) : {};
       document.getElementById('stat-votes').textContent = Object.values(v).reduce((s,c)=>s+c,0);
     });
+  }
+  function renderAdminCloud(words){
+    const c = document.getElementById('admin-cloud');
+    const entries = Object.entries(words);
+    if(!entries.length){ c.innerHTML = '<p class="admin-empty" style="padding:20px 0;">ยังไม่มีคำตอบ</p>'; return; }
+    entries.sort((a,b)=>b[1]-a[1]);
+    const max = entries[0][1];
+    const palette = ['var(--brand-dark)','var(--brand)','var(--accent)','#1A8AB0'];
+    c.innerHTML = '';
+    entries.forEach(([w,cnt],i)=>{
+      const size = 16 + (cnt/max)*26;
+      const s = document.createElement('span');
+      s.className = 'cloud-word';
+      s.style.fontSize = size.toFixed(0)+'px';
+      s.style.color = palette[i%palette.length];
+      s.title = cnt+' ครั้ง';
+      s.textContent = w+' ('+cnt+')';
+      c.appendChild(s);
+    });
+  }
+  function renderAggBox(id, counts, keyLabel){
+    const el = document.getElementById(id);
+    const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    if(!entries.length){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
+    const max = entries[0][1];
+    el.innerHTML = entries.map(([k,v])=>{
+      const label = keyLabel ? keyLabel(k) : k;
+      const pct = Math.round(v/max*100);
+      return `<div class="agg-row"><span class="label">${label}</span><div class="bar-mini"><div style="width:${pct}%"></div></div><span class="count">${v}</span></div>`;
+    }).join('');
+  }
+  function renderAggregations(all){
+    const basinC = {}, concernC = {}, conflictC = {}, planC = {};
+    all.forEach(r=>{
+      if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
+      (r.concerns||[]).forEach(c=>concernC[c] = (concernC[c]||0)+1);
+      if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
+      (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
+    });
+    renderAggBox('agg-basin', basinC, k=>`${k} · ${BASIN_LABEL[k]||'?'}`);
+    renderAggBox('agg-concerns', concernC);
+    renderAggBox('agg-conflict', conflictC, k=>CONFLICT_LABEL[k]||k);
+    renderAggBox('agg-plans', planC);
   }
 
   function renderRecent(docs){
