@@ -542,6 +542,12 @@
   .agg-row .count{font-weight:600;color:var(--brand-dark);min-width:36px;text-align:right;}
   .admin-cloud{background:var(--brand-lighter);border-radius:var(--radius);padding:20px;min-height:120px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px 18px;text-align:center;}
   .admin-cloud .cloud-word{font-family:'TH Sarabun New','Sarabun',sans-serif;font-weight:700;}
+  /* Vertical bar chart */
+  .vchart{display:flex;align-items:flex-end;gap:14px;height:260px;padding:20px 12px 12px;background:var(--brand-lighter);border-radius:var(--radius);overflow-x:auto;}
+  .vchart-col{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;}
+  .vchart-num{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:4px;font-family:'TH Sarabun New','Sarabun',sans-serif;}
+  .vchart-bar{width:100%;border-radius:8px 8px 0 0;transition:height .5s cubic-bezier(.4,0,.2,1);min-height:2px;box-shadow:0 -2px 6px rgba(0,0,0,0.06);}
+  .vchart-label{font-size:14px;color:var(--ink);text-align:center;margin-top:8px;line-height:1.3;font-weight:500;padding:0 2px;}
 </style>
 </head>
 <body>
@@ -844,11 +850,11 @@
     <section class="panel" data-apanel="2">
       <div class="admin-section">
         <h2>จำนวนคำที่ถูกเลือก (1.2)</h2>
-        <div class="agg-list" id="agg-words"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="vchart" id="vchart-words"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
       </div>
       <div class="admin-section">
-        <h2>ผลโหวตวิสัยทัศน์ (2)</h2>
-        <div class="agg-list" id="agg-vision"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <h2>ประเด็นที่กังวลมากที่สุด (1.3)</h2>
+        <div class="vchart" id="vchart-concerns"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
       </div>
     </section>
 
@@ -859,8 +865,8 @@
         <div class="agg-list" id="agg-basin"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
       <div class="admin-section">
-        <h2>ประเด็นที่คนกังวล (1.3)</h2>
-        <div class="agg-list" id="agg-concerns"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <h2>ผลโหวตวิสัยทัศน์ (2)</h2>
+        <div class="agg-list" id="agg-vision"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
       <div class="admin-section">
         <h2>ความขัดแย้ง (1.4)</h2>
@@ -1284,7 +1290,7 @@
       document.getElementById('stat-words').textContent = Object.keys(w).length;
       document.getElementById('stat-word-total').textContent = Object.values(w).reduce((s,c)=>s+c,0);
       renderAdminCloud(w);
-      renderAggBox('agg-words', w);
+      renderVerticalChart('vchart-words', w);
     });
     pollRef.onSnapshot(doc=>{
       const v = doc.exists ? (doc.data().votes || {}) : {};
@@ -1311,6 +1317,19 @@
       c.appendChild(s);
     });
   }
+  const VCHART_COLORS = ['#0F6C8B','#E48A3A','#2E9970','#5B4285','#C0533A','#1A8AB0','#D67328','#8A6BAF'];
+  function renderVerticalChart(id, counts, keyLabel){
+    const el = document.getElementById(id);
+    const entries = Object.entries(counts);
+    if(!entries.length){ el.innerHTML = '<p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p>'; return; }
+    const max = Math.max(...entries.map(([,v])=>v));
+    el.innerHTML = entries.map(([k,v],i)=>{
+      const label = keyLabel ? keyLabel(k) : k;
+      const h = Math.max(2, (v/max)*180);
+      const color = VCHART_COLORS[i % VCHART_COLORS.length];
+      return `<div class="vchart-col"><div class="vchart-num">${v}</div><div class="vchart-bar" style="height:${h}px;background:${color};"></div><div class="vchart-label">${label}</div></div>`;
+    }).join('');
+  }
   function renderAggBox(id, counts, keyLabel){
     const el = document.getElementById(id);
     const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
@@ -1333,7 +1352,7 @@
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
     });
     renderAggBox('agg-basin', basinC, k=>`${k} · ${BASIN_LABEL[k]||'?'}`);
-    renderAggBox('agg-concerns', concernC);
+    renderVerticalChart('vchart-concerns', concernC);
     renderAggBox('agg-conflict', conflictC, k=>CONFLICT_LABEL[k]||k);
     renderAggBox('agg-plans', planC);
   }
