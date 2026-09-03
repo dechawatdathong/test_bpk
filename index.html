@@ -121,6 +121,54 @@
     transition:width .4s cubic-bezier(.4,0,.2,1);
   }
 
+  /* ============ HEADER LOGO ============ */
+  .header-top-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:14px;
+  }
+  .org-logo{
+    flex:0 0 auto;
+    width:52px;
+    height:52px;
+    background:#fff;
+    border-radius:14px;
+    padding:6px;
+    box-shadow:var(--shadow-md), 0 0 0 rgba(255,255,255,0);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    animation:logoGlow 2.6s ease-in-out infinite;
+  }
+  @keyframes logoGlow{
+    0%,100%{box-shadow:var(--shadow-md), 0 0 10px 2px rgba(255,255,255,.35), 0 0 22px 4px rgba(126,224,255,.30);}
+    50%{box-shadow:var(--shadow-md), 0 0 18px 6px rgba(255,255,255,.65), 0 0 38px 12px rgba(126,224,255,.55);}
+  }
+  .org-logo img{width:100%;height:100%;object-fit:contain;display:block;}
+
+  /* ============ LANDMARK — blended, no frame ============ */
+  .title-row{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .title-row h1{flex:1 1 220px;margin:0;}
+  .title-landmark{
+    flex:0 0 auto;
+    width:150px;
+    height:225px;
+    margin:-18px -14px -14px 0;
+    pointer-events:none;
+  }
+  .title-landmark img{width:100%;height:100%;object-fit:contain;display:block;mix-blend-mode:normal;}
+  @media(min-width:640px){
+    .title-landmark{width:220px;height:330px;margin:-26px -20px -20px 0;}
+  }
+
   /* ============ STEP TABS ============ */
   .steps{
     display:grid;
@@ -549,15 +597,108 @@
   .vchart-bar{width:100%;border-radius:8px 8px 0 0;transition:height .5s cubic-bezier(.4,0,.2,1);min-height:2px;box-shadow:0 -2px 6px rgba(0,0,0,0.06);}
   .vchart-label{font-size:14px;color:var(--ink);text-align:center;margin-top:8px;line-height:1.3;font-weight:500;padding:0 2px;}
 </style>
+
+<style id="bpk-ui-v2">
+  /* ===== BPK Web UI v2: visual enhancement layer ===== */
+  :root{
+    --bg:#F4F8FA; --card:#FFFFFF; --ink:#17303B; --ink-soft:#5B717C; --ink-mute:#8B9BA4;
+    --brand:#0B667D; --brand-dark:#064B5E; --brand-light:#E7F4F7; --brand-lighter:#F4FAFB;
+    --accent:#E39A4C; --accent-light:#FFF5E9; --success:#2E8C6B; --danger:#B9543A;
+    --line:#E0E9ED; --line-strong:#C8D7DD;
+    --shadow-sm:0 2px 8px rgba(17,55,68,.05); --shadow-md:0 8px 24px rgba(17,55,68,.08); --shadow-lg:0 18px 48px rgba(17,55,68,.12);
+    --radius-sm:12px; --radius:16px; --radius-lg:22px;
+  }
+  body{background:radial-gradient(circle at 15% 5%,rgba(63,167,179,.07),transparent 26%),var(--bg);font-family:'Sarabun','TH Sarabun New',sans-serif;}
+  .header{min-height:238px;padding:34px 20px 58px;background:linear-gradient(135deg,#063F50 0%,#0A6075 54%,#13859B 100%);box-shadow:0 8px 28px rgba(6,63,80,.16);}
+  .header-art,.admin-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  .header-grid{position:absolute;inset:0;opacity:.20;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:36px 36px;mask-image:linear-gradient(to bottom,black,transparent 78%);}
+  .header .wrap{z-index:2;}
+  .brand-badge{backdrop-filter:blur(8px);background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.22);padding:6px 13px;font-size:11px;letter-spacing:.10em;}
+  .header h1{font-size:clamp(29px,6vw,42px);max-width:760px;text-shadow:0 2px 14px rgba(0,0,0,.15);}
+  .header:after{content:'BANG PAKONG RIVER BASIN';position:absolute;right:22px;top:24px;color:rgba(255,255,255,.18);font-size:10px;letter-spacing:.18em;font-weight:600;}
+  .steps{gap:10px;margin-bottom:28px;}
+  .step-btn{border-color:#D9E5E9;border-radius:16px;padding:13px 8px 12px;box-shadow:0 4px 12px rgba(15,60,75,.05);}
+  .step-btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(15,60,75,.09);}
+  .step-btn.active{box-shadow:0 8px 20px rgba(11,102,125,.22);}
+  .step-num{width:26px;height:26px;font-size:12px;}
+  .card{border:1px solid rgba(17,55,68,.05);box-shadow:var(--shadow-md);padding:30px 26px;position:relative;overflow:hidden;}
+  .card:before{content:'';position:absolute;left:0;top:0;width:4px;height:100%;background:linear-gradient(180deg,var(--brand),rgba(63,167,179,.25));opacity:.9;}
+  .q-label{font-size:11px;letter-spacing:.07em;padding:4px 11px;}
+  .q-title{font-size:30px;letter-spacing:-.01em;}
+  .q-hint{font-size:18px;}
+  .choice{border-color:#DDE7EA;background:linear-gradient(180deg,#fff,#FCFEFE);border-radius:13px;padding:14px 15px;box-shadow:0 1px 2px rgba(0,0,0,.02);}
+  .choice:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(11,102,125,.08);}
+  .choice.selected{box-shadow:0 6px 16px rgba(11,102,125,.10);}
+  .cloud{background:radial-gradient(circle at 50% 45%,#fff,transparent 65%),linear-gradient(135deg,#EAF7F8,#F9FCFD);border-color:#D8E9ED;min-height:210px;position:relative;}
+  .cloud:after{content:'LIVE';position:absolute;right:14px;top:12px;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--success);background:#E8F6F0;padding:4px 8px;border-radius:999px;}
+  .vision-quote{background:linear-gradient(135deg,#064B5E,#0D778D);box-shadow:0 12px 26px rgba(6,75,94,.16);border:1px solid rgba(255,255,255,.08);}
+  .vision-quote:after{content:'WATER · PEOPLE · FUTURE';position:absolute;bottom:10px;right:20px;font-size:9px;letter-spacing:.15em;color:rgba(255,255,255,.34);}
+  .poll-summary{border:1px solid #DCEBED;background:linear-gradient(135deg,#F2FAFB,#FAFCFC);}
+  .bar-track{height:11px;background:#E3ECEE;}
+  .nav-row{padding-top:24px;margin-top:24px;}
+  .btn{border-radius:13px;padding:13px 24px;box-shadow:0 6px 14px rgba(11,102,125,.14);}
+  .btn.accent{box-shadow:0 6px 14px rgba(227,154,76,.18);}
+  .success-inner{border-radius:24px;box-shadow:var(--shadow-lg);}
+  .admin-header{position:relative;overflow:hidden;background:linear-gradient(135deg,#34244C,#5B4380 65%,#7556A0);min-height:210px;}
+  .admin-header .wrap{position:relative;z-index:2;}
+  .admin-header:after{content:'DATA · INSIGHT · DECISION';position:absolute;right:22px;top:24px;color:rgba(255,255,255,.2);font-size:10px;letter-spacing:.16em;font-weight:600;}
+  .stat-box{border:1px solid #E1E9ED;box-shadow:var(--shadow-sm);}
+  .stat-num{font-size:38px;}
+  .admin-section{border:1px solid #E0E8EC;box-shadow:var(--shadow-md);}
+  .admin-section h2{display:flex;align-items:center;gap:10px;}
+  .admin-section h2:before{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 5px var(--accent-light);}
+  .admin-table{border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .site-footer{margin:28px 0 0;padding:18px 4px;color:#81939B;font-size:12px;display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);}
+  .footer-mark{font-weight:700;color:var(--brand-dark);letter-spacing:.08em;}
+  .footer-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:6px;}
+  @media(max-width:640px){.header{min-height:225px}.header:after,.admin-header:after{display:none}.site-footer{flex-direction:column}.card{padding:25px 19px}.q-title{font-size:27px}}
+</style>
+<link rel="stylesheet" href="bright_overrides.css">
 </head>
 <body>
 
 <div id="main-view">
 
 <div class="header">
+  <svg class="header-art" viewBox="0 0 900 260" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="riverGlow" x1="0" x2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset="0.5" stop-color="#7FE1E8" stop-opacity="0.22"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+      <filter id="blurGlow"><feGaussianBlur stdDeviation="12"/></filter>
+    </defs>
+    <circle cx="760" cy="50" r="92" fill="#E59A4A" opacity=".10"/>
+    <circle cx="820" cy="120" r="150" fill="#5ED5DF" opacity=".08"/>
+    <path d="M-20 210 C120 145 205 245 335 184 S570 120 700 180 S820 230 920 150" fill="none" stroke="url(#riverGlow)" stroke-width="34" filter="url(#blurGlow)"/>
+    <path d="M-20 210 C120 145 205 245 335 184 S570 120 700 180 S820 230 920 150" fill="none" stroke="#B7F0F2" stroke-opacity=".20" stroke-width="2"/>
+    <path d="M30 235 C150 185 250 260 365 208 S590 165 710 208 S820 245 900 190" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="1.5"/>
+    <!-- landmark line-art silhouette: Wat Sothon-style prang, echoing the photo below -->
+    <g fill="none" stroke="#ffffff" stroke-opacity=".28" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M645 200 L651 165 L657 150 L663 116 L666 92 L669 116 L675 150 L681 165 L687 200 Z"/>
+      <path d="M639 200 L645 178 L687 178 L693 200 Z"/>
+      <path d="M627 200 L639 185 L693 185 L705 200 Z"/>
+      <path d="M614 200 L627 200 M705 200 L718 200"/>
+      <path d="M600 200 L614 200 L621 210 L711 210 L718 200 L732 200"/>
+      <path d="M596 210 L736 210 L736 214 L596 214 Z" stroke-opacity=".18"/>
+    </g>
+  </svg>
+  <div class="header-grid" aria-hidden="true"></div>
+  <div class="header-bubbles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="header-boat" aria-hidden="true">
+    <svg viewBox="0 0 90 46" xmlns="http://www.w3.org/2000/svg"><path d="M10 27h66l-10 11H20z" fill="#FFB13B"/><path d="M38 26V8h3v18" fill="#fff"/><path d="M41 9l20 9H41z" fill="#FF7B9C"/><circle cx="18" cy="31" r="2" fill="#fff" opacity=".8"/></svg>
+  </div>
   <div class="wrap">
-    <span class="brand-badge">เวทีรับฟังความคิดเห็น</span>
-    <h1>แผนแม่บทการบริหารจัดการทรัพยากรน้ำลุ่มน้ำบางปะกง</h1>
+    <div class="header-top-row">
+      <span class="brand-badge">เวทีรับฟังความคิดเห็น</span>
+      <div class="org-logo">
+        <img src="logo-onwr.svg" alt="ตราสัญลักษณ์สำนักงานทรัพยากรน้ำแห่งชาติ">
+      </div>
+    </div>
+    <div class="title-row">
+      <h1>โครงการศึกษาจัดทำแผนแม่บทการบริหารจัดการทรัพยากรในเขตลุ่มน้ำบางปะกง ปรับปรุงช่วงที่ 1 (พ.ศ.2566-2580)</h1>
+    </div>
   </div>
 </div>
 
@@ -803,6 +944,10 @@
     </div>
   </section>
 
+<div class="site-footer">
+  <div class="footer-mark"><span class="footer-dot"></span> BANG PAKONG RIVER BASIN</div>
+  <div>การมีส่วนร่วมของทุกภาคส่วน · เพื่อการบริหารจัดการน้ำอย่างยั่งยืน</div>
+</div>
 </div>
 </div><!-- /#main-view -->
 
