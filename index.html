@@ -728,16 +728,21 @@
       <h3 class="q-title">ท่านอยู่หรือใช้ประโยชน์จากลุ่มน้ำสายใด?</h3>
       <p class="q-hint">เลือกลุ่มน้ำหลักที่เกี่ยวข้องกับท่านมากที่สุด</p>
       <div class="choices">
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">คลองพระสะทึง</span><span class="code">1501 · เวทีที่ 3</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำพระปรงส่วนที่ 1</span><span class="code">1502 · เวทีที่ 2</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำพระปรงส่วนที่ 2</span><span class="code">1503 · เวทีที่ 2</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำหนุมาน</span><span class="code">1504 · เวทีที่ 2</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำปราจีนบุรีตอนล่าง</span><span class="code">1505 · เวทีที่ 1</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">แม่น้ำนครนายก</span><span class="code">1506 · เวทีที่ 1</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">ที่ราบแม่น้ำบางปะกงส่วนที่ 1</span><span class="code">1507 · เวทีที่ 5</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">คลองท่าลาด</span><span class="code">1508 · เวทีที่ 4</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">คลองหลวง</span><span class="code">1509 · เวทีที่ 5</span></button>
-        <button class="choice" onclick="pickRadio(this)"><span class="icon"></span><span class="text">ที่ราบแม่น้ำบางปะกงส่วนที่ 2</span><span class="code">1510 · เวทีที่ 5</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">คลองพระสะทึง</span><span class="code">1501 · เวทีที่ 3</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">แม่น้ำพระปรงส่วนที่ 1</span><span class="code">1502 · เวทีที่ 2</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">แม่น้ำพระปรงส่วนที่ 2</span><span class="code">1503 · เวทีที่ 2</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">แม่น้ำหนุมาน</span><span class="code">1504 · เวทีที่ 2</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">แม่น้ำปราจีนบุรีตอนล่าง</span><span class="code">1505 · เวทีที่ 1</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">แม่น้ำนครนายก</span><span class="code">1506 · เวทีที่ 1</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">ที่ราบแม่น้ำบางปะกงส่วนที่ 1</span><span class="code">1507 · เวทีที่ 5</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">คลองท่าลาด</span><span class="code">1508 · เวทีที่ 4</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">คลองหลวง</span><span class="code">1509 · เวทีที่ 5</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">ที่ราบแม่น้ำบางปะกงส่วนที่ 2</span><span class="code">1510 · เวทีที่ 5</span></button>
+        <button class="choice" data-other="1" onclick="pickRadio(this);toggleSub('basin-other-wrap',true);setTimeout(()=>document.getElementById('basin-other').focus(),50)"><span class="icon"></span><span class="text">อื่นๆ (พิมพ์เอง)</span><span class="code">อื่นๆ</span></button>
+      </div>
+      <div class="field" id="basin-other-wrap" style="display:none;margin-top:12px;">
+        <label class="field-label">ระบุลุ่มน้ำ/พื้นที่/หน่วยงาน</label>
+        <input type="text" id="basin-other" placeholder="พิมพ์ชื่อลุ่มน้ำ พื้นที่ หรือหน่วยงานที่สังกัด">
       </div>
     </div>
 
@@ -1110,7 +1115,12 @@
     if(!panel) return errs;
     if(n===1){
       const cards = panel.querySelectorAll('.card');
-      if(!cards[0].querySelector('.choice.selected')) errs.push(cards[0]);
+      const b1 = cards[0].querySelector('.choice.selected');
+      if(!b1) errs.push(cards[0]);
+      else if(b1.dataset.other==='1'){
+        const inp = document.getElementById('basin-other');
+        if(!inp.value.trim()) errs.push(inp);
+      }
       // 1.2 word (required) + area (required)
       if(!cards[1].querySelector('#word-choices .choice.selected')) errs.push(cards[1].querySelector('#word-choices'));
       const area = cards[1].querySelector('#area-input');
@@ -1386,8 +1396,16 @@
   function collectData(){
     const cards = document.querySelectorAll('[data-panel="1"] .card');
     const basinBtn = cards[0]?.querySelector('.choice.selected');
-    let basin = null;
-    if(basinBtn){ const code = basinBtn.querySelector('.code'); basin = code ? code.textContent.split('·')[0].trim() : null; }
+    let basin = null, basin_other = '';
+    if(basinBtn){
+      if(basinBtn.dataset.other==='1'){
+        basin = 'OTHER';
+        basin_other = (document.getElementById('basin-other')?.value || '').trim();
+      } else {
+        const code = basinBtn.querySelector('.code');
+        basin = code ? code.textContent.split('·')[0].trim() : null;
+      }
+    }
     const area = (document.getElementById('area-input')?.value || '').trim();
     const concernBtn = cards[2].querySelector('.choice.selected');
     const concern = concernBtn ? concernBtn.querySelector('.text').textContent.trim() : null;
@@ -1421,7 +1439,7 @@
     const planOther = (document.getElementById('plan-other')?.value || '').trim();
     if(planOther) plans.push('อื่นๆ: '+planOther);
 
-    return {basin, area, concern, conflict, conflict_types, vision, vision_comment, strategy_status, strategy_add, strategy_rank, dev_rank, dim_rank, plans, words:[...window.mySubmittedWords]};
+    return {basin, basin_other, area, concern, conflict, conflict_types, vision, vision_comment, strategy_status, strategy_add, strategy_rank, dev_rank, dim_rank, plans, words:[...window.mySubmittedWords]};
   }
 
   async function submitAll(){
@@ -1537,7 +1555,7 @@
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
     });
-    renderAggBox('agg-basin', basinC, k=>`${k} · ${BASIN_LABEL[k]||'?'}`);
+    renderAggBox('agg-basin', basinC, k=> k==='OTHER' ? 'อื่นๆ (พิมพ์เอง)' : `${k} · ${BASIN_LABEL[k]||'?'}`);
     renderAggBox('agg-concerns', concernC);
     renderAggBox('agg-conflict', conflictC, k=>CONFLICT_LABEL[k]||k);
     renderAggBox('agg-plans', planC);
@@ -1550,7 +1568,7 @@
     docs.forEach(d=>{
       const r = d.data();
       const ts = r.ts?.toDate ? r.ts.toDate().toLocaleString('th-TH') : '-';
-      const basin = r.basin ? (r.basin+' · '+(BASIN_LABEL[r.basin]||'')) : '-';
+      const basin = r.basin==='OTHER' ? ('อื่นๆ · '+(r.basin_other||'—')) : (r.basin ? (r.basin+' · '+(BASIN_LABEL[r.basin]||'')) : '-');
       const words = (r.words||[]).join(', ') || '-';
       const vision = r.vision ? VISION_LABEL[r.vision] : '-';
       html += `<tr><td>${ts}</td><td>${basin}</td><td>${words}</td><td>${vision}</td></tr>`;
@@ -1619,7 +1637,7 @@
         const row = [
           ts,
           r.basin || '',
-          r.basin ? (BASIN_LABEL[r.basin]||'') : '',
+          r.basin==='OTHER' ? (r.basin_other||'อื่นๆ') : (r.basin ? (BASIN_LABEL[r.basin]||'') : ''),
           r.area || '',
           (r.words||[]).join(', '),
           r.concern || (r.concerns||[]).join(', '),
@@ -1671,7 +1689,7 @@
       const bc = {};
       responses.forEach(r=>{ if(r.basin) bc[r.basin] = (bc[r.basin]||0)+1; });
       const br = [['รหัส','ลุ่มน้ำ','จำนวนผู้ตอบ']];
-      Object.entries(bc).sort((a,b)=>b[1]-a[1]).forEach(([code,cnt])=>br.push([code, BASIN_LABEL[code]||'?', cnt]));
+      Object.entries(bc).sort((a,b)=>b[1]-a[1]).forEach(([code,cnt])=>br.push([code, code==='OTHER' ? 'อื่นๆ (พิมพ์เอง)' : (BASIN_LABEL[code]||'?'), cnt]));
       const ws5 = XLSX.utils.aoa_to_sheet(br);
       ws5['!cols'] = [{wch:10},{wch:36},{wch:14}];
       XLSX.utils.book_append_sheet(wb, ws5, 'สรุปลุ่มน้ำ');
