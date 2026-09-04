@@ -581,6 +581,14 @@
   @keyframes pop2{from{transform:scale(0);}to{transform:scale(1);}}
   .success-inner h1{font-size:36px;color:#fff;margin-bottom:12px;}
   .success-inner p{font-size:20px;color:rgba(255,255,255,0.9);margin-bottom:24px;line-height:1.5;}
+  /* Sending overlay */
+  #sending-overlay{position:fixed;inset:0;background:rgba(15,45,70,0.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:2500;padding:20px;}
+  #sending-overlay.show{display:flex;}
+  .sending-box{background:#fff;border-radius:20px;padding:32px 40px;box-shadow:0 20px 60px rgba(0,0,0,0.25);text-align:center;min-width:260px;}
+  .sending-spin{width:56px;height:56px;border:5px solid var(--brand-light);border-top-color:var(--brand);border-radius:50%;margin:0 auto 18px;animation:spin 0.9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .sending-box h3{font-size:22px;color:var(--brand-dark);margin-bottom:6px;}
+  .sending-box p{font-size:16px;color:var(--ink-soft);}
   /* Admin aggregation section */
   .agg-list{display:flex;flex-direction:column;gap:6px;}
   .agg-row{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--brand-lighter);border-radius:8px;font-size:15px;}
@@ -950,6 +958,14 @@
 </div>
 </div>
 </div><!-- /#main-view -->
+
+<div id="sending-overlay">
+  <div class="sending-box">
+    <div class="sending-spin"></div>
+    <h3>กำลังส่งข้อมูล...</h3>
+    <p>กรุณารอสักครู่ อย่าปิดหน้าเว็บ</p>
+  </div>
+</div>
 
 <div id="success-overlay">
   <div class="success-inner">
@@ -1421,6 +1437,7 @@
     }
     const btn = event?.currentTarget;
     if(btn) btn.disabled = true;
+    document.getElementById('sending-overlay').classList.add('show');
     try{
       const data = collectData();
       await responsesRef.add({...data, ts: serverTimestamp()});
@@ -1428,9 +1445,11 @@
       if(data.vision === 'improve' && data.vision_comment){
         await pollRef.set({ feedback: arrayUnion(data.vision_comment) }, {merge:true});
       }
+      document.getElementById('sending-overlay').classList.remove('show');
       document.getElementById('success-overlay').classList.add('show');
     }catch(e){
       console.error(e);
+      document.getElementById('sending-overlay').classList.remove('show');
       alert('บันทึกไม่สำเร็จ: '+e.message);
       if(btn) btn.disabled = false;
     }
@@ -1555,6 +1574,29 @@
     }catch(e){ alert('ลบไม่สำเร็จ: '+e.message); }
   }
 
+  // Compute Excel column widths from actual content (Thai-aware)
+  function autoWidth(rows, {min=10, max=80}={}){
+    if(!rows.length) return [];
+    const cols = rows[0].length;
+    const widths = new Array(cols).fill(min);
+    for(const row of rows){
+      for(let i=0;i<cols;i++){
+        const v = row[i] == null ? '' : String(row[i]);
+        // Thai chars ~1.6x width of ASCII in Excel default font
+        let w = 0;
+        for(const ch of v){ w += /[฀-๿]/.test(ch) ? 1.6 : 1; }
+        // Handle multi-line: use widest line
+        const lines = v.split('\n');
+        if(lines.length > 1){
+          w = Math.max(...lines.map(l=>{
+            let x=0; for(const ch of l) x += /[฀-๿]/.test(ch) ? 1.6 : 1; return x;
+          }));
+        }
+        if(w + 2 > widths[i]) widths[i] = Math.min(max, Math.ceil(w) + 2);
+      }
+    }
+    return widths.map(w=>({wch: w}));
+  }
   async function exportExcel(){
     try{
       const snap = await responsesRef.orderBy('ts','desc').get();
@@ -1595,7 +1637,7 @@
         rows.push(row);
       });
       const ws1 = XLSX.utils.aoa_to_sheet(rows);
-      ws1['!cols'] = header.map((h,i)=>({wch: i===0?18 : (i<=3?16:22)}));
+      ws1['!cols'] = autoWidth(rows, {min:10, max:80});
       XLSX.utils.book_append_sheet(wb, ws1, 'รายการตอบทั้งหมด');
 
       // Sheet 2 — word cloud
