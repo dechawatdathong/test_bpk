@@ -738,7 +738,7 @@
         <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">คลองท่าลาด</span><span class="code">1508 · เวทีที่ 4</span></button>
         <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">คลองหลวง</span><span class="code">1509 · เวทีที่ 5</span></button>
         <button class="choice" onclick="pickRadio(this);toggleSub('basin-other-wrap',false)"><span class="icon"></span><span class="text">ที่ราบแม่น้ำบางปะกงส่วนที่ 2</span><span class="code">1510 · เวทีที่ 5</span></button>
-        <button class="choice" data-other="1" onclick="pickRadio(this);toggleSub('basin-other-wrap',true);setTimeout(()=>document.getElementById('basin-other').focus(),50)"><span class="icon"></span><span class="text">อื่นๆ (พิมพ์เอง)</span><span class="code">อื่นๆ</span></button>
+        <button class="choice" data-other="1" onclick="pickRadio(this);toggleSub('basin-other-wrap',true);setTimeout(()=>document.getElementById('basin-other').focus(),50)"><span class="icon"></span><span class="text">อื่นๆ</span><span class="code">อื่นๆ</span></button>
       </div>
       <div class="field" id="basin-other-wrap" style="display:none;margin-top:12px;">
         <label class="field-label">ระบุลุ่มน้ำ/พื้นที่/หน่วยงาน</label>
@@ -1555,7 +1555,7 @@
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
     });
-    renderAggBox('agg-basin', basinC, k=> k==='OTHER' ? 'อื่นๆ (พิมพ์เอง)' : `${k} · ${BASIN_LABEL[k]||'?'}`);
+    renderAggBox('agg-basin', basinC, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
     renderAggBox('agg-concerns', concernC);
     renderAggBox('agg-conflict', conflictC, k=>CONFLICT_LABEL[k]||k);
     renderAggBox('agg-plans', planC);
@@ -1689,7 +1689,7 @@
       const bc = {};
       responses.forEach(r=>{ if(r.basin) bc[r.basin] = (bc[r.basin]||0)+1; });
       const br = [['รหัส','ลุ่มน้ำ','จำนวนผู้ตอบ']];
-      Object.entries(bc).sort((a,b)=>b[1]-a[1]).forEach(([code,cnt])=>br.push([code, code==='OTHER' ? 'อื่นๆ (พิมพ์เอง)' : (BASIN_LABEL[code]||'?'), cnt]));
+      Object.entries(bc).sort((a,b)=>b[1]-a[1]).forEach(([code,cnt])=>br.push([code, code==='OTHER' ? 'อื่นๆ' : (BASIN_LABEL[code]||'?'), cnt]));
       const ws5 = XLSX.utils.aoa_to_sheet(br);
       ws5['!cols'] = [{wch:10},{wch:36},{wch:14}];
       XLSX.utils.book_append_sheet(wb, ws5, 'สรุปลุ่มน้ำ');
