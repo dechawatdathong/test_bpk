@@ -1502,7 +1502,10 @@
       document.getElementById('stat-words').textContent = Object.keys(w).length;
       document.getElementById('stat-word-total').textContent = Object.values(w).reduce((s,c)=>s+c,0);
       renderAdminCloud(w);
-      renderVerticalChart('vchart-words', w);
+      // Fixed order + zero fill so bars stay in place regardless of vote arrival order
+      const wFull = {};
+      WORD_ORDER.forEach(k=> wFull[k] = w[k]||0);
+      renderVerticalChart('vchart-words', wFull);
     });
     pollRef.onSnapshot(doc=>{
       const v = doc.exists ? (doc.data().votes || {}) : {};
@@ -1533,6 +1536,7 @@
     });
   }
   const VCHART_COLORS = ['#0F6C8B','#E48A3A','#2E9970','#5B4285','#C0533A','#1A8AB0','#D67328','#8A6BAF'];
+  const WORD_ORDER = ['น้ำท่วม','น้ำแล้ง','น้ำเค็ม','น้ำเสีย','น้ำไม่พอ','ประปา','แย่งน้ำ'];
   function colorForKey(key){
     let h = 0;
     const s = String(key);
