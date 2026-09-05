@@ -951,6 +951,15 @@
       </div>
     </div>
 
+    <div class="card">
+      <span class="q-label">ข้อเสนอแนะเพิ่มเติม</span>
+      <h3 class="q-title">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</h3>
+      <p class="q-hint">สามารถแสดงความคิดเห็น ข้อเสนอแนะ หรือข้อกังวลอื่นๆ เพิ่มเติมได้</p>
+      <div class="field">
+        <textarea id="extra-suggestion" rows="5" placeholder="พิมพ์ข้อเสนอแนะเพิ่มเติมของท่าน..."></textarea>
+      </div>
+    </div>
+
     <div class="nav-row">
       <button class="btn ghost" onclick="go(3)">← กลับ</button>
       <button class="btn accent" onclick="submitAll()">ส่งคำตอบทั้งหมด</button>
@@ -1439,7 +1448,9 @@
     const planOther = (document.getElementById('plan-other')?.value || '').trim();
     if(planOther) plans.push('อื่นๆ: '+planOther);
 
-    return {basin, basin_other, area, concern, conflict, conflict_types, vision, vision_comment, strategy_status, strategy_add, strategy_rank, dev_rank, dim_rank, plans, words:[...window.mySubmittedWords]};
+    const extra_suggestion = (document.getElementById('extra-suggestion')?.value || '').trim();
+
+    return {basin, basin_other, area, concern, conflict, conflict_types, vision, vision_comment, strategy_status, strategy_add, strategy_rank, dev_rank, dim_rank, plans, extra_suggestion, words:[...window.mySubmittedWords]};
   }
 
   async function submitAll(){
@@ -1630,7 +1641,7 @@
       const header = ['วันที่-เวลา','รหัสลุ่มน้ำ','ลุ่มน้ำ','บริเวณ','คำที่เลือก','ประเด็นกังวล','ความขัดแย้ง','คู่ความขัดแย้ง','วิสัยทัศน์','ข้อเสนอแนะวิสัยทัศน์','ยุทธ์เหมาะสม/เพิ่ม','เพิ่มยุทธ์'];
       for(let i=1;i<=5;i++) header.push('อันดับยุทธ์ '+i);
       for(let i=0;i<=3;i++) header.push('อันดับทางเลือก '+i);
-      header.push('อันดับเศรษฐกิจ','อันดับสังคม','อันดับสิ่งแวดล้อม','แผนงานที่เลือก');
+      header.push('อันดับเศรษฐกิจ','อันดับสังคม','อันดับสิ่งแวดล้อม','แผนงานที่เลือก','ข้อเสนอแนะเพิ่มเติม');
       const rows = [header];
       responses.forEach(r=>{
         const ts = r.ts?.toDate ? r.ts.toDate().toLocaleString('th-TH') : '';
@@ -1650,7 +1661,8 @@
           r.strategy_rank?.['1']||'', r.strategy_rank?.['2']||'', r.strategy_rank?.['3']||'', r.strategy_rank?.['4']||'', r.strategy_rank?.['5']||'',
           r.dev_rank?.['0']||'', r.dev_rank?.['1']||'', r.dev_rank?.['2']||'', r.dev_rank?.['3']||'',
           r.dim_rank?.econ||'', r.dim_rank?.social||'', r.dim_rank?.env||'',
-          (r.plans||[]).join(', ')
+          (r.plans||[]).join(', '),
+          r.extra_suggestion || ''
         ];
         rows.push(row);
       });
@@ -1685,7 +1697,21 @@
       ws4['!cols'] = [{wch:80}];
       XLSX.utils.book_append_sheet(wb, ws4, 'ข้อเสนอแนะ');
 
-      // Sheet 5 — สรุปลุ่มน้ำ
+      // Sheet 5 — ข้อเสนอแนะเพิ่มเติม
+      const ex = [['ลำดับ','วันที่-เวลา','ลุ่มน้ำ','ข้อเสนอแนะเพิ่มเติม']];
+      let exNo = 0;
+      responses.forEach(r=>{
+        if(!r.extra_suggestion) return;
+        exNo++;
+        const ts = r.ts?.toDate ? r.ts.toDate().toLocaleString('th-TH') : '';
+        const basinName = r.basin==='OTHER' ? (r.basin_other||'อื่นๆ') : (r.basin ? (BASIN_LABEL[r.basin]||'') : '');
+        ex.push([exNo, ts, basinName, r.extra_suggestion]);
+      });
+      const wsEx = XLSX.utils.aoa_to_sheet(ex);
+      wsEx['!cols'] = autoWidth(ex, {min:8, max:80});
+      XLSX.utils.book_append_sheet(wb, wsEx, 'ข้อเสนอแนะเพิ่มเติม');
+
+      // Sheet 6 — สรุปลุ่มน้ำ
       const bc = {};
       responses.forEach(r=>{ if(r.basin) bc[r.basin] = (bc[r.basin]||0)+1; });
       const br = [['รหัส','ลุ่มน้ำ','จำนวนผู้ตอบ']];
