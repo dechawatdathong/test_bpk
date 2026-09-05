@@ -1533,15 +1533,21 @@
     });
   }
   const VCHART_COLORS = ['#0F6C8B','#E48A3A','#2E9970','#5B4285','#C0533A','#1A8AB0','#D67328','#8A6BAF'];
+  function colorForKey(key){
+    let h = 0;
+    const s = String(key);
+    for(let i=0;i<s.length;i++){ h = ((h<<5) - h + s.charCodeAt(i)) | 0; }
+    return VCHART_COLORS[Math.abs(h) % VCHART_COLORS.length];
+  }
   function renderVerticalChart(id, counts, keyLabel){
     const el = document.getElementById(id);
     const entries = Object.entries(counts);
     if(!entries.length){ el.innerHTML = '<p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p>'; return; }
     const max = Math.max(1, ...entries.map(([,v])=>v));
-    el.innerHTML = entries.map(([k,v],i)=>{
+    el.innerHTML = entries.map(([k,v])=>{
       const label = keyLabel ? keyLabel(k) : k;
       const h = v > 0 ? Math.max(6, (v/max)*180) : 2;
-      const color = VCHART_COLORS[i % VCHART_COLORS.length];
+      const color = colorForKey(k);
       return `<div class="vchart-col"><div class="vchart-num">${v}</div><div class="vchart-bar" style="height:${h}px;background:${color};"></div><div class="vchart-label">${label}</div></div>`;
     }).join('');
   }
