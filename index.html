@@ -1606,7 +1606,7 @@
       const top1 = ranks.filter(r=>r===1).length;
       const label = itemLabels[k];
       return {k, label, avg, n, top1};
-    }).sort((a,b)=> (a.n?a.avg:99) - (b.n?b.avg:99));
+    }).sort((a,b)=> b.top1 - a.top1);
     if(!rows.some(r=>r.n)){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
     const maxTop = Math.max(1, ...rows.map(r=>r.top1));
     el.innerHTML = rows.map(r=>{
