@@ -567,6 +567,9 @@
   .admin-table tbody tr:hover{background:var(--brand-lighter);}
   .admin-empty{text-align:center;color:var(--ink-mute);padding:30px 20px;font-size:16px;}
   .admin-note{background:var(--accent-light);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;font-size:14px;color:var(--ink-soft);margin-top:12px;}
+  .fb-title{font-size:14px;color:var(--ink-soft);margin:14px 0 8px;font-weight:500;}
+  .fb-item{padding:9px 13px;background:#F3F8FA;border-left:3px solid var(--brand);border-radius:6px;margin-bottom:6px;font-size:14px;color:var(--ink);line-height:1.5;}
+  .fb-more{font-size:13px;color:var(--ink-mute);margin-top:6px;font-style:italic;}
   /* Validation error state */
   .err-highlight{animation:shake .4s;border-color:var(--danger) !important;background:var(--danger-light) !important;}
   @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
@@ -1017,6 +1020,8 @@
       <div class="admin-section">
         <h2>สรุปตามลุ่มน้ำ (1.1)</h2>
         <div class="agg-list" id="agg-basin"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">ตัวอย่างลุ่มน้ำ/พื้นที่/หน่วยงานที่ระบุเพิ่ม (อื่นๆ)</div>
+        <div id="fb-basin-other"><p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1041,11 +1046,15 @@
       <div class="admin-section">
         <h2>ผลโหวตวิสัยทัศน์ (2)</h2>
         <div class="vchart" id="vchart-vision"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">ตัวอย่างข้อเสนอแนะปรับปรุงวิสัยทัศน์</div>
+        <div id="fb-vision"><p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
         <h2>ร่างประเด็นยุทธศาสตร์ (3.1)</h2>
         <div class="agg-list" id="agg-strategy-status"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">ตัวอย่างประเด็นที่ควรเพิ่มเติม</div>
+        <div id="fb-strategy"><p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1069,6 +1078,13 @@
       <div class="admin-section">
         <h2>แผนงานยอดนิยม (4.3)</h2>
         <div class="agg-list" id="agg-plans"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">ตัวอย่างแผนงานอื่นๆ ที่ระบุเพิ่ม</div>
+        <div id="fb-plan-other"><p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>ข้อเสนอแนะเพิ่มเติม</h2>
+        <div id="fb-extra"><p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1596,24 +1612,36 @@
   const STRAT_STATUS = {ok:'มีความเหมาะสมแล้ว', add:'ควรเพิ่มเติมประเด็น'};
 
   function renderRankAgg(id, rankData, totalResp, itemLabels){
-    // rankData: { itemKey: [rank1, rank2, ...] } — array of ranks each person gave that item
+    // Weighted score: rank 1 = maxRank pts, rank 2 = maxRank-1 pts, ..., rank N = 1 pt
     const el = document.getElementById(id);
     const keys = Object.keys(itemLabels);
+    const maxRank = keys.length;
     const rows = keys.map(k=>{
       const ranks = rankData[k] || [];
       const n = ranks.length;
-      const avg = n ? (ranks.reduce((s,r)=>s+r,0)/n) : 0;
-      const top1 = ranks.filter(r=>r===1).length;
+      const score = ranks.reduce((s,r)=> s + (maxRank + 1 - r), 0);
       const label = itemLabels[k];
-      return {k, label, avg, n, top1};
-    }).sort((a,b)=> b.top1 - a.top1);
+      return {k, label, score, n};
+    }).sort((a,b)=> b.score - a.score);
     if(!rows.some(r=>r.n)){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
-    const maxTop = Math.max(1, ...rows.map(r=>r.top1));
+    const maxScore = Math.max(1, ...rows.map(r=>r.score));
+    const maxPossible = totalResp * maxRank;
     el.innerHTML = rows.map((r,i)=>{
-      const barW = Math.round(r.top1/maxTop*100);
-      const pct = totalResp ? Math.round(r.top1/totalResp*100) : 0;
-      return `<div class="agg-row"><span class="label">${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">อันดับที่ ${i+1} คนโหวต ${r.top1} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
+      const barW = Math.round(r.score/maxScore*100);
+      const pct = maxPossible ? Math.round(r.score/maxPossible*100) : 0;
+      return `<div class="agg-row"><span class="label">${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">อันดับที่ ${i+1} คะแนนรวม ${r.score} คะแนน คิดเป็นร้อยละ ${pct}% (${r.n} โหวต)</span></div>`;
     }).join('');
+  }
+
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function renderFeedbackList(id, texts, max=3){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const arr = (texts||[]).map(t=>String(t||'').trim()).filter(t=>t);
+    if(!arr.length){ el.innerHTML = '<p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p>'; return; }
+    const shown = arr.slice(-max).reverse();
+    el.innerHTML = shown.map(t=>`<div class="fb-item">${escapeHtml(t)}</div>`).join('')
+      + (arr.length > max ? `<p class="fb-more">... และอีก ${arr.length-max} รายการ</p>` : '');
   }
 
   function renderAggregations(all){
@@ -1622,6 +1650,7 @@
     const stratRank = {'1':[],'2':[],'3':[],'4':[],'5':[]};
     const devRank = {'0':[],'1':[],'2':[],'3':[]};
     const dimRank = {econ:[], social:[], env:[]};
+    const basinOthers = [], visionComments = [], strategyAdds = [], planOthers = [], extras = [];
     all.forEach(r=>{
       if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
       if(r.concern) concernC[r.concern] = (concernC[r.concern]||0)+1;
@@ -1632,6 +1661,11 @@
       if(r.strategy_rank) Object.entries(r.strategy_rank).forEach(([k,v])=>{ if(stratRank[k] && v) stratRank[k].push(v); });
       if(r.dev_rank) Object.entries(r.dev_rank).forEach(([k,v])=>{ if(devRank[k] && v) devRank[k].push(v); });
       if(r.dim_rank) Object.entries(r.dim_rank).forEach(([k,v])=>{ if(dimRank[k] && v) dimRank[k].push(v); });
+      if(r.basin === 'OTHER' && r.basin_other) basinOthers.push(r.basin_other);
+      if(r.vision_comment) visionComments.push(r.vision_comment);
+      if(r.strategy_status === 'add' && r.strategy_add) strategyAdds.push(r.strategy_add);
+      (r.plans||[]).forEach(p=>{ if(typeof p==='string' && p.startsWith('อื่นๆ:')) planOthers.push(p.replace(/^อื่นๆ:\s*/,'')); });
+      if(r.extra_suggestion) extras.push(r.extra_suggestion);
     });
     renderAggBox('agg-basin', basinC, total, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
     renderAggBox('agg-concerns', concernC, total);
@@ -1643,6 +1677,11 @@
     const devMap = {}; DEV_LABELS.forEach((l,i)=>devMap[String(i)] = l);
     renderRankAgg('agg-dev-rank', devRank, total, devMap);
     renderRankAgg('agg-dim-rank', dimRank, total, DIM_LABELS);
+    renderFeedbackList('fb-basin-other', basinOthers);
+    renderFeedbackList('fb-vision', visionComments);
+    renderFeedbackList('fb-strategy', strategyAdds);
+    renderFeedbackList('fb-plan-other', planOthers);
+    renderFeedbackList('fb-extra', extras);
   }
 
   function renderRecent(docs){
