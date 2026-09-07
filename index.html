@@ -790,7 +790,7 @@
       <div class="choices">
         <button class="choice" onclick="pickRadio(this);toggleSub('conflict-sub',false)"><span class="icon"></span><span class="text">ไม่มี</span></button>
         <button class="choice" onclick="pickRadio(this);toggleSub('conflict-sub',true)"><span class="icon"></span><span class="text">เคยเกิดขึ้นแล้ว</span></button>
-        <button class="choice" onclick="pickRadio(this);toggleSub('conflict-sub',false)"><span class="icon"></span><span class="text">ยังไม่เกิด แต่มีแนวโน้มในอนาคต</span></button>
+        <button class="choice" onclick="pickRadio(this);toggleSub('conflict-sub',true)"><span class="icon"></span><span class="text">ยังไม่เกิด แต่มีแนวโน้มในอนาคต</span></button>
       </div>
       <div class="sub-wrap" id="conflict-sub" style="display:none;">
         <p>ระหว่างใครกับใคร? (เลือกได้หลายข้อ)</p>
@@ -1044,6 +1044,29 @@
       </div>
 
       <div class="admin-section">
+        <h2>ร่างประเด็นยุทธศาสตร์ (3.1)</h2>
+        <div class="agg-list" id="agg-strategy-status"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>เรียงลำดับความสำคัญของยุทธศาสตร์ (3.2)</h2>
+        <p class="q-hint" style="margin-bottom:10px;">อันดับเฉลี่ย (1 = สำคัญที่สุด) · แสดงจำนวนคนที่ให้อันดับ 1</p>
+        <div class="agg-list" id="agg-strategy-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>ทางเลือกการพัฒนาลุ่มน้ำ (4.1)</h2>
+        <p class="q-hint" style="margin-bottom:10px;">อันดับเฉลี่ย (1 = เหมาะสมที่สุด) · แสดงจำนวนคนที่ให้อันดับ 1</p>
+        <div class="agg-list" id="agg-dev-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>เกณฑ์พิจารณาแนวทางพัฒนา (4.2)</h2>
+        <p class="q-hint" style="margin-bottom:10px;">อันดับเฉลี่ย (1 = สำคัญที่สุด) · แสดงจำนวนคนที่ให้อันดับ 1</p>
+        <div class="agg-list" id="agg-dim-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
         <h2>แผนงานยอดนิยม (4.3)</h2>
         <div class="agg-list" id="agg-plans"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
@@ -1137,7 +1160,7 @@
       if(!cb) errs.push(cards[3].querySelector('.choices'));
       else{
         const idx = [...cb.parentElement.children].indexOf(cb);
-        if(idx===1 && !cards[3].querySelectorAll('.sub-check input:checked').length) errs.push(cards[3].querySelector('#conflict-sub'));
+        if((idx===1 || idx===2) && !cards[3].querySelectorAll('.sub-check input:checked').length) errs.push(cards[3].querySelector('#conflict-sub'));
       }
     }
     else if(n===2){
@@ -1567,21 +1590,58 @@
       return `<div class="agg-row"><span class="label">${label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} คน · ${pct}%</span></div>`;
     }).join('');
   }
+  const STRATEGY_LABELS = ['1. การจัดการน้ำอุปโภค-บริโภค','2. การจัดสรรน้ำเพื่อการผลิต','3. การจัดการภัยพิบัติทางน้ำ','4. การฟื้นฟูระบบนิเวศ','5. การยกระดับธรรมาภิบาล'];
+  const DEV_LABELS = ['ทางเลือก 0 คงสภาพเดิม (BAU)','ทางเลือก 1 โครงสร้างพื้นฐาน','ทางเลือก 2 นิเวศ+นวัตกรรม','ทางเลือก 3 ธรรมาภิบาลชุมชน'];
+  const DIM_LABELS = {econ:'มิติด้านเศรษฐกิจ', social:'มิติด้านสังคม', env:'มิติสิ่งแวดล้อม'};
+  const STRAT_STATUS = {ok:'มีความเหมาะสมแล้ว', add:'ควรเพิ่มเติมประเด็น'};
+
+  function renderRankAgg(id, rankData, itemLabels){
+    // rankData: { itemKey: [rank1, rank2, ...] } — array of ranks each person gave that item
+    const el = document.getElementById(id);
+    const keys = Object.keys(itemLabels);
+    const rows = keys.map(k=>{
+      const ranks = rankData[k] || [];
+      const n = ranks.length;
+      const avg = n ? (ranks.reduce((s,r)=>s+r,0)/n) : 0;
+      const top1 = ranks.filter(r=>r===1).length;
+      const label = typeof itemLabels === 'object' && !Array.isArray(itemLabels) ? itemLabels[k] : itemLabels[k];
+      return {k, label, avg, n, top1};
+    }).sort((a,b)=> (a.n?a.avg:99) - (b.n?b.avg:99));
+    if(!rows.some(r=>r.n)){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
+    const maxTop = Math.max(1, ...rows.map(r=>r.top1));
+    el.innerHTML = rows.map(r=>{
+      const barW = Math.round(r.top1/maxTop*100);
+      return `<div class="agg-row"><span class="label">${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">อันดับเฉลี่ย ${r.n?r.avg.toFixed(2):'-'} · #1 ${r.top1} คน (${r.n} โหวต)</span></div>`;
+    }).join('');
+  }
+
   function renderAggregations(all){
     const total = all.length;
-    const basinC = {}, concernC = {}, conflictC = {}, planC = {};
+    const basinC = {}, concernC = {}, conflictC = {}, planC = {}, stratStatusC = {};
+    const stratRank = {'1':[],'2':[],'3':[],'4':[],'5':[]};
+    const devRank = {'0':[],'1':[],'2':[],'3':[]};
+    const dimRank = {econ:[], social:[], env:[]};
     all.forEach(r=>{
       if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
-      // support both new (single concern) and old (concerns array)
       if(r.concern) concernC[r.concern] = (concernC[r.concern]||0)+1;
       (r.concerns||[]).forEach(c=>concernC[c] = (concernC[c]||0)+1);
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
+      if(r.strategy_status) stratStatusC[r.strategy_status] = (stratStatusC[r.strategy_status]||0)+1;
+      if(r.strategy_rank) Object.entries(r.strategy_rank).forEach(([k,v])=>{ if(stratRank[k] && v) stratRank[k].push(v); });
+      if(r.dev_rank) Object.entries(r.dev_rank).forEach(([k,v])=>{ if(devRank[k] && v) devRank[k].push(v); });
+      if(r.dim_rank) Object.entries(r.dim_rank).forEach(([k,v])=>{ if(dimRank[k] && v) dimRank[k].push(v); });
     });
     renderAggBox('agg-basin', basinC, total, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
     renderAggBox('agg-concerns', concernC, total);
     renderAggBox('agg-conflict', conflictC, total, k=>CONFLICT_LABEL[k]||k);
     renderAggBox('agg-plans', planC, total);
+    renderAggBox('agg-strategy-status', stratStatusC, total, k=>STRAT_STATUS[k]||k);
+    const stratMap = {}; STRATEGY_LABELS.forEach((l,i)=>stratMap[String(i+1)] = l);
+    renderRankAgg('agg-strategy-rank', stratRank, stratMap);
+    const devMap = {}; DEV_LABELS.forEach((l,i)=>devMap[String(i)] = l);
+    renderRankAgg('agg-dev-rank', devRank, devMap);
+    renderRankAgg('agg-dim-rank', dimRank, DIM_LABELS);
   }
 
   function renderRecent(docs){
