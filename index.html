@@ -766,10 +766,6 @@
         <label class="field-label">บริเวณ</label>
         <input type="text" id="area-input" placeholder="หมู่/ตำบล/อำเภอ/จังหวัด">
       </div>
-      <div class="cloud" id="cloud">
-        <p class="empty-cloud" style="color:var(--ink-mute);">ยังไม่มีคำตอบ</p>
-      </div>
-      <p class="cloud-stat" id="cloud-stat">คำตอบทั้งหมด <b>0</b> รายการ · <b>0</b> คำ</p>
     </div>
 
     <div class="card">
@@ -1314,32 +1310,13 @@
 
   window.mySubmittedWords = [];
 
-  /* -------- Word pick (changeable, 1 vote realtime) -------- */
+  /* -------- Word pick (local only — saved on final submit) -------- */
   function pickWord(el){
     const word = el.dataset.word;
-    const prev = localStorage.getItem('wordVoted');
-    if(prev === word) return; // same choice — no-op
     el.parentElement.querySelectorAll('.choice').forEach(o=>o.classList.remove('selected'));
     el.classList.add('selected');
-    const upd = { words: { [word]: increment(1) } };
-    if(prev) upd.words[prev] = increment(-1);
-    cloudRef.set(upd, {merge:true})
-      .then(()=>{
-        if(prev){
-          const i = window.mySubmittedWords.indexOf(prev);
-          if(i>=0) window.mySubmittedWords.splice(i,1);
-        }
-        window.mySubmittedWords.push(word);
-        localStorage.setItem('wordVoted', word);
-      })
-      .catch(e=>{
-        console.error(e); alert('ส่งไม่สำเร็จ: '+e.message);
-        el.classList.remove('selected');
-        if(prev){
-          const p = el.parentElement.querySelector(`[data-word="${prev}"]`);
-          if(p) p.classList.add('selected');
-        }
-      });
+    window.mySubmittedWords = [word];
+    localStorage.setItem('wordVoted', word);
   }
   function pickConcern(el){
     el.parentElement.querySelectorAll('.choice').forEach(o=>o.classList.remove('selected'));
@@ -1387,38 +1364,6 @@
       if(vv === 'improve') toggleSub('vision-feedback', true);
     }
   });
-  cloudRef.onSnapshot(doc=>{
-    const words = doc.exists ? (doc.data().words || {}) : {};
-    renderCloud(words);
-  }, err=>console.error('cloud err:',err));
-
-  function renderCloud(words){
-    const cloud = document.getElementById('cloud');
-    const stat = document.getElementById('cloud-stat');
-    const entries = Object.entries(words);
-    cloud.innerHTML = '';
-    if(entries.length===0){
-      cloud.innerHTML = '<p style="color:var(--ink-mute);">ยังไม่มีคำตอบ — พิมพ์เลย</p>';
-      stat.innerHTML = 'คำตอบทั้งหมด <b>0</b> รายการ · <b>0</b> คำ';
-      return;
-    }
-    entries.sort((a,b)=>b[1]-a[1]);
-    const max = entries[0][1];
-    const total = entries.reduce((s,[,c])=>s+c,0);
-    const palette = ['var(--brand-dark)','var(--brand)','var(--accent)','#1A8AB0'];
-    entries.forEach(([w,c],i)=>{
-      const size = 18 + (c/max)*32;
-      const s = document.createElement('span');
-      s.className = 'cloud-word';
-      s.style.fontSize = size.toFixed(0)+'px';
-      s.style.color = palette[i%palette.length];
-      s.title = c+' ครั้ง';
-      s.textContent = w;
-      cloud.appendChild(s);
-    });
-    stat.innerHTML = `คำตอบทั้งหมด <b>${total}</b> รายการ · <b>${entries.length}</b> คำ`;
-  }
-
   /* -------- Vision poll display (LIVE) -------- */
   pollRef.onSnapshot(doc=>{
     const d = doc.exists ? doc.data() : {votes:{}, feedback:[]};
@@ -1533,17 +1478,16 @@
       const all = snap.docs.map(d=>d.data());
       renderRecent(snap.docs.slice(0,10));
       renderAggregations(all);
-    }, err=>console.error('resp err:',err));
-    cloudRef.onSnapshot(doc=>{
-      const w = doc.exists ? (doc.data().words || {}) : {};
+      // Aggregate word cloud from responses (1 response = 1 vote)
+      const w = {};
+      all.forEach(r=> (r.words||[]).forEach(word=>{ if(word) w[word] = (w[word]||0)+1; }));
       document.getElementById('stat-words').textContent = Object.keys(w).length;
       document.getElementById('stat-word-total').textContent = Object.values(w).reduce((s,c)=>s+c,0);
       renderAdminCloud(w);
-      // Fixed order + zero fill so bars stay in place regardless of vote arrival order
       const wFull = {};
       WORD_ORDER.forEach(k=> wFull[k] = w[k]||0);
       renderVerticalChart('vchart-words', wFull);
-    });
+    }, err=>console.error('resp err:',err));
     pollRef.onSnapshot(doc=>{
       const v = doc.exists ? (doc.data().votes || {}) : {};
       document.getElementById('stat-votes').textContent = Object.values(v).reduce((s,c)=>s+c,0);
@@ -1742,8 +1686,9 @@
     try{
       const snap = await responsesRef.orderBy('ts','desc').get();
       const responses = snap.docs.map(d=>d.data());
-      const cloudDoc = await cloudRef.get();
-      const words = cloudDoc.exists ? (cloudDoc.data().words||{}) : {};
+      // Aggregate word cloud from responses (1 response = 1 vote)
+      const words = {};
+      responses.forEach(r=> (r.words||[]).forEach(w=>{ if(w) words[w] = (words[w]||0)+1; }));
       const pollDoc = await pollRef.get();
       const pollData = pollDoc.exists ? pollDoc.data() : {votes:{}, feedback:[]};
 
