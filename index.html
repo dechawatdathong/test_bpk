@@ -599,6 +599,17 @@
   .agg-row .bar-mini{width:80px;height:6px;background:var(--line);border-radius:999px;overflow:hidden;}
   .agg-row .bar-mini > div{height:100%;background:var(--brand);border-radius:999px;}
   .agg-row .count{font-weight:600;color:var(--brand-dark);min-width:36px;text-align:right;}
+  .rank-agg-list{display:flex;flex-direction:column;gap:14px;}
+  .rank-agg-row{padding:16px 18px;background:var(--brand-lighter);border-radius:12px;border-left:4px solid var(--brand);}
+  .rank-agg-row.top1{border-left-color:var(--accent);background:linear-gradient(90deg, var(--accent-light) 0%, var(--brand-lighter) 60%);}
+  .rank-agg-head{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;font-size:15px;flex-wrap:wrap;}
+  .rank-agg-num{background:var(--brand);color:#fff;padding:4px 12px;border-radius:8px;font-weight:600;font-size:13px;flex-shrink:0;letter-spacing:.02em;}
+  .rank-agg-row.top1 .rank-agg-num{background:var(--accent);}
+  .rank-agg-label{flex:1;color:var(--ink);font-weight:500;line-height:1.4;min-width:200px;}
+  .rank-agg-score{color:var(--brand-dark);font-weight:700;white-space:nowrap;font-size:15px;}
+  .rank-agg-bar{width:100%;height:12px;background:var(--line);border-radius:999px;overflow:hidden;}
+  .rank-agg-bar > div{height:100%;background:var(--brand);border-radius:999px;transition:width .6s ease;}
+  .rank-agg-row.top1 .rank-agg-bar > div{background:linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%);}
   .admin-cloud{background:var(--brand-lighter);border-radius:var(--radius);padding:20px;min-height:120px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px 18px;text-align:center;}
   .admin-cloud .cloud-word{font-family:'TH Sarabun New','Sarabun',sans-serif;font-weight:700;}
   /* Vertical bar chart */
@@ -1056,19 +1067,19 @@
       <div class="admin-section">
         <h2>เรียงลำดับความสำคัญของยุทธศาสตร์ (3.2)</h2>
         <p class="q-hint" style="margin-bottom:10px;">อันดับเฉลี่ย (1 = สำคัญที่สุด) · แสดงจำนวนคนที่ให้อันดับ 1</p>
-        <div class="agg-list" id="agg-strategy-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="rank-agg-list" id="agg-strategy-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
         <h2>ทางเลือกการพัฒนาลุ่มน้ำ (4.1)</h2>
         <p class="q-hint" style="margin-bottom:10px;">อันดับเฉลี่ย (1 = เหมาะสมที่สุด) · แสดงจำนวนคนที่ให้อันดับ 1</p>
-        <div class="agg-list" id="agg-dev-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="rank-agg-list" id="agg-dev-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
         <h2>เกณฑ์พิจารณาแนวทางพัฒนา (4.2)</h2>
         <p class="q-hint" style="margin-bottom:10px;">อันดับเฉลี่ย (1 = สำคัญที่สุด) · แสดงจำนวนคนที่ให้อันดับ 1</p>
-        <div class="agg-list" id="agg-dim-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="rank-agg-list" id="agg-dim-rank"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1573,7 +1584,8 @@
     el.innerHTML = rows.map((r,i)=>{
       const barW = Math.round(r.score/maxScore*100);
       const pct = maxPossible ? Math.round(r.score/maxPossible*100) : 0;
-      return `<div class="agg-row"><span class="label">${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">อันดับที่ ${i+1} คะแนนรวม ${r.score} คะแนน คิดเป็นร้อยละ ${pct}% (${r.n} โหวต)</span></div>`;
+      const cls = i===0 ? 'rank-agg-row top1' : 'rank-agg-row';
+      return `<div class="${cls}"><div class="rank-agg-head"><span class="rank-agg-num">อันดับที่ ${i+1}</span><span class="rank-agg-label">${r.label}</span><span class="rank-agg-score">${r.score} คะแนน · ${pct}%</span></div><div class="rank-agg-bar"><div style="width:${barW}%"></div></div></div>`;
     }).join('');
   }
 
