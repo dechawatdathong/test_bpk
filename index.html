@@ -1587,7 +1587,7 @@
       const label = keyLabel ? keyLabel(k) : k;
       const barW = Math.round(v/max*100);
       const pct = totalResp ? Math.round(v/totalResp*100) : 0;
-      return `<div class="agg-row"><span class="label">${label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} คน · ${pct}%</span></div>`;
+      return `<div class="agg-row"><span class="label">${label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} คน คิดเป็นร้อยละ ${pct}% จากผู้กรอกแบบสอบถามทั้งหมด</span></div>`;
     }).join('');
   }
   const STRATEGY_LABELS = ['1. การจัดการน้ำอุปโภค-บริโภค','2. การจัดสรรน้ำเพื่อการผลิต','3. การจัดการภัยพิบัติทางน้ำ','4. การฟื้นฟูระบบนิเวศ','5. การยกระดับธรรมาภิบาล'];
