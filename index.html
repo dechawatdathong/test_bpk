@@ -1595,7 +1595,7 @@
   const DIM_LABELS = {econ:'มิติด้านเศรษฐกิจ', social:'มิติด้านสังคม', env:'มิติสิ่งแวดล้อม'};
   const STRAT_STATUS = {ok:'มีความเหมาะสมแล้ว', add:'ควรเพิ่มเติมประเด็น'};
 
-  function renderRankAgg(id, rankData, itemLabels){
+  function renderRankAgg(id, rankData, totalResp, itemLabels){
     // rankData: { itemKey: [rank1, rank2, ...] } — array of ranks each person gave that item
     const el = document.getElementById(id);
     const keys = Object.keys(itemLabels);
@@ -1604,14 +1604,15 @@
       const n = ranks.length;
       const avg = n ? (ranks.reduce((s,r)=>s+r,0)/n) : 0;
       const top1 = ranks.filter(r=>r===1).length;
-      const label = typeof itemLabels === 'object' && !Array.isArray(itemLabels) ? itemLabels[k] : itemLabels[k];
+      const label = itemLabels[k];
       return {k, label, avg, n, top1};
     }).sort((a,b)=> (a.n?a.avg:99) - (b.n?b.avg:99));
     if(!rows.some(r=>r.n)){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
     const maxTop = Math.max(1, ...rows.map(r=>r.top1));
     el.innerHTML = rows.map(r=>{
       const barW = Math.round(r.top1/maxTop*100);
-      return `<div class="agg-row"><span class="label">${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">อันดับเฉลี่ย ${r.n?r.avg.toFixed(2):'-'} · #1 ${r.top1} คน (${r.n} โหวต)</span></div>`;
+      const pct = totalResp ? Math.round(r.top1/totalResp*100) : 0;
+      return `<div class="agg-row"><span class="label">${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">อันดับ 1 คนโหวตทั้งหมด ${r.top1} คน คิดเป็นร้อยละ ${pct}% จากผู้กรอกแบบสอบถามทั้งหมด</span></div>`;
     }).join('');
   }
 
@@ -1638,10 +1639,10 @@
     renderAggBox('agg-plans', planC, total);
     renderAggBox('agg-strategy-status', stratStatusC, total, k=>STRAT_STATUS[k]||k);
     const stratMap = {}; STRATEGY_LABELS.forEach((l,i)=>stratMap[String(i+1)] = l);
-    renderRankAgg('agg-strategy-rank', stratRank, stratMap);
+    renderRankAgg('agg-strategy-rank', stratRank, total, stratMap);
     const devMap = {}; DEV_LABELS.forEach((l,i)=>devMap[String(i)] = l);
-    renderRankAgg('agg-dev-rank', devRank, devMap);
-    renderRankAgg('agg-dim-rank', dimRank, DIM_LABELS);
+    renderRankAgg('agg-dev-rank', devRank, total, devMap);
+    renderRankAgg('agg-dim-rank', dimRank, total, DIM_LABELS);
   }
 
   function renderRecent(docs){
