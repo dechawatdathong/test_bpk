@@ -1001,13 +1001,11 @@
 
   <div class="wrap" style="padding-top:24px;">
     <div class="steps" style="margin-bottom:20px;">
-      <button class="step-btn active" data-atab="1" onclick="adminGo(1)"><div class="step-num">1</div><div class="step-label">ภาพรวม</div></button>
-      <button class="step-btn" data-atab="2" onclick="adminGo(2)"><div class="step-num">2</div><div class="step-label">กราฟแท่ง</div></button>
-      <button class="step-btn" data-atab="3" onclick="adminGo(3)"><div class="step-num">3</div><div class="step-label">รายละเอียด</div></button>
-      <button class="step-btn" data-atab="4" onclick="adminGo(4)"><div class="step-num">4</div><div class="step-label">จัดการ</div></button>
+      <button class="step-btn active" data-atab="1" onclick="adminGo(1)"><div class="step-num">1</div><div class="step-label">ภาพรวม · กราฟ · รายละเอียด</div></button>
+      <button class="step-btn" data-atab="2" onclick="adminGo(2)"><div class="step-num">2</div><div class="step-label">จัดการ</div></button>
     </div>
 
-    <!-- Admin panel 1: ภาพรวม -->
+    <!-- Admin panel 1: ภาพรวม + กราฟ + รายละเอียด (รวม) -->
     <section class="panel active" data-apanel="1">
       <div class="stat-grid">
         <div class="stat-box"><div class="stat-num" id="stat-responses">0</div><div class="stat-label">ผู้ตอบทั้งหมด</div></div>
@@ -1015,50 +1013,49 @@
         <div class="stat-box"><div class="stat-num" id="stat-word-total">0</div><div class="stat-label">จำนวนคำที่เลือก</div></div>
         <div class="stat-box"><div class="stat-num" id="stat-votes">0</div><div class="stat-label">โหวตวิสัยทัศน์</div></div>
       </div>
+
       <div class="admin-section">
-        <h2>เวิร์ดคลาวด์ (realtime)</h2>
+        <h2>สรุปตามลุ่มน้ำ (1.1)</h2>
+        <div class="agg-list" id="agg-basin"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>จำนวนคำที่ถูกเลือก (1.2)</h2>
+        <div class="vchart" id="vchart-words"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
+      </div>
+      <div class="admin-section">
+        <h2>เวิร์ดคลาวด์ realtime (1.2)</h2>
         <div class="admin-cloud" id="admin-cloud"><p class="admin-empty" style="padding:20px 0;">ยังไม่มีคำตอบ</p></div>
       </div>
+
+      <div class="admin-section">
+        <h2>ประเด็นที่คนกังวล (1.3)</h2>
+        <div class="agg-list" id="agg-concerns"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>ความขัดแย้ง (1.4)</h2>
+        <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>ผลโหวตวิสัยทัศน์ (2)</h2>
+        <div class="vchart" id="vchart-vision"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section">
+        <h2>แผนงานยอดนิยม (4.3)</h2>
+        <div class="agg-list" id="agg-plans"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
       <div class="admin-section">
         <h2>รายการตอบล่าสุด</h2>
         <div id="recent-list"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
     </section>
 
-    <!-- Admin panel 2: กราฟแท่ง -->
+    <!-- Admin panel 2: จัดการ -->
     <section class="panel" data-apanel="2">
-      <div class="admin-section">
-        <h2>จำนวนคำที่ถูกเลือก (1.2)</h2>
-        <div class="vchart" id="vchart-words"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
-      </div>
-      <div class="admin-section">
-        <h2>ผลโหวตวิสัยทัศน์ (2)</h2>
-        <div class="vchart" id="vchart-vision"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
-      </div>
-    </section>
-
-    <!-- Admin panel 3: รายละเอียด -->
-    <section class="panel" data-apanel="3">
-      <div class="admin-section">
-        <h2>สรุปตามลุ่มน้ำ (1.1)</h2>
-        <div class="agg-list" id="agg-basin"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-      </div>
-      <div class="admin-section">
-        <h2>ประเด็นที่คนกังวล (1.3)</h2>
-        <div class="agg-list" id="agg-concerns"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-      </div>
-      <div class="admin-section">
-        <h2>ความขัดแย้ง (1.4)</h2>
-        <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-      </div>
-      <div class="admin-section">
-        <h2>แผนงานยอดนิยม (4.3)</h2>
-        <div class="agg-list" id="agg-plans"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-      </div>
-    </section>
-
-    <!-- Admin panel 4: จัดการ -->
-    <section class="panel" data-apanel="4">
       <div class="admin-section">
         <h2>Export ข้อมูล</h2>
         <p style="color:var(--ink-soft);font-size:16px;margin-bottom:14px;">รวมข้อมูลทั้งหมดในไฟล์ Excel เดียว แบ่งเป็น sheet ตามประเภท</p>
@@ -1493,7 +1490,7 @@
 
   function initAdmin(){
     responsesRef.orderBy('ts','desc').onSnapshot(snap=>{
-      document.getElementById('stat-responses').textContent = snap.size;
+      document.getElementById('stat-responses').innerHTML = snap.size + ' <span style="font-size:16px;font-weight:500;color:var(--ink-soft);">คน</span>';
       const all = snap.docs.map(d=>d.data());
       renderRecent(snap.docs.slice(0,10));
       renderAggregations(all);
@@ -1558,20 +1555,20 @@
       return `<div class="vchart-col"><div class="vchart-num">${v} <span style="font-size:12px;color:var(--ink-soft);">(${pct}%)</span></div><div class="vchart-bar" style="height:${h}px;background:${color};"></div><div class="vchart-label">${label}</div></div>`;
     }).join('');
   }
-  function renderAggBox(id, counts, keyLabel){
+  function renderAggBox(id, counts, totalResp, keyLabel){
     const el = document.getElementById(id);
     const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
     if(!entries.length){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
     const max = entries[0][1];
-    const total = entries.reduce((s,[,v])=>s+v,0);
     el.innerHTML = entries.map(([k,v])=>{
       const label = keyLabel ? keyLabel(k) : k;
       const barW = Math.round(v/max*100);
-      const pct = total ? Math.round(v/total*100) : 0;
-      return `<div class="agg-row"><span class="label">${label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} · ${pct}%</span></div>`;
+      const pct = totalResp ? Math.round(v/totalResp*100) : 0;
+      return `<div class="agg-row"><span class="label">${label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} คน · ${pct}%</span></div>`;
     }).join('');
   }
   function renderAggregations(all){
+    const total = all.length;
     const basinC = {}, concernC = {}, conflictC = {}, planC = {};
     all.forEach(r=>{
       if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
@@ -1581,10 +1578,10 @@
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
     });
-    renderAggBox('agg-basin', basinC, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
-    renderAggBox('agg-concerns', concernC);
-    renderAggBox('agg-conflict', conflictC, k=>CONFLICT_LABEL[k]||k);
-    renderAggBox('agg-plans', planC);
+    renderAggBox('agg-basin', basinC, total, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
+    renderAggBox('agg-concerns', concernC, total);
+    renderAggBox('agg-conflict', conflictC, total, k=>CONFLICT_LABEL[k]||k);
+    renderAggBox('agg-plans', planC, total);
   }
 
   function renderRecent(docs){
