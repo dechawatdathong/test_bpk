@@ -1609,10 +1609,10 @@
     }).sort((a,b)=> b.top1 - a.top1);
     if(!rows.some(r=>r.n)){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
     const maxTop = Math.max(1, ...rows.map(r=>r.top1));
-    el.innerHTML = rows.map(r=>{
+    el.innerHTML = rows.map((r,i)=>{
       const barW = Math.round(r.top1/maxTop*100);
       const pct = totalResp ? Math.round(r.top1/totalResp*100) : 0;
-      return `<div class="agg-row"><span class="label">${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">อันดับ 1 คนโหวตทั้งหมด ${r.top1} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
+      return `<div class="agg-row"><span class="label">อันดับที่ ${i+1} · ${r.label}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${r.top1} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
     }).join('');
   }
 
