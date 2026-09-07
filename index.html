@@ -610,8 +610,9 @@
   .rank-agg-bar{width:100%;height:12px;background:var(--line);border-radius:999px;overflow:hidden;}
   .rank-agg-bar > div{height:100%;background:var(--brand);border-radius:999px;transition:width .6s ease;}
   .rank-agg-row.top1 .rank-agg-bar > div{background:linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%);}
-  .vchart.vchart-rank{height:340px;padding:24px 16px 16px;gap:20px;}
-  .vchart.vchart-rank .vchart-col{min-width:130px;}
+  .vchart.vchart-rank{height:340px;padding:24px 20px 16px;gap:28px;}
+  .vchart.vchart-rank .vchart-col{min-width:80px;max-width:110px;flex:0 1 90px;}
+  .vchart.vchart-rank .vchart-bar{max-width:44px;margin:0 auto;}
   .vchart.vchart-rank .vchart-label{font-size:13px;line-height:1.4;}
   .vchart.vchart-rank .vchart-label b{color:var(--brand-dark);font-size:14px;display:block;margin-bottom:2px;}
   .admin-cloud{background:var(--brand-lighter);border-radius:var(--radius);padding:20px;min-height:120px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px 18px;text-align:center;}
@@ -1588,7 +1589,7 @@
       const h = r.score > 0 ? Math.max(6, (r.score/maxScore)*220) : 2;
       const color = colorForKey(r.k);
       const pct = maxPossible ? Math.round(r.score/maxPossible*100) : 0;
-      return `<div class="vchart-col"><div class="vchart-num">${r.score} <span style="font-size:12px;color:var(--ink-soft);">(${pct}%)</span></div><div class="vchart-bar" style="height:${h}px;background:${color};"></div><div class="vchart-label"><b>อันดับที่ ${i+1}</b>${r.label}</div></div>`;
+      return `<div class="vchart-col"><div class="vchart-num">${pct}%</div><div class="vchart-bar" style="height:${h}px;background:${color};"></div><div class="vchart-label"><b>อันดับที่ ${i+1}</b>${r.label}</div></div>`;
     }).join('');
   }
 
