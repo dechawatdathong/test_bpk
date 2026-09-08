@@ -1056,8 +1056,6 @@
       <div class="admin-section">
         <h2>ความขัดแย้ง (1.4)</h2>
         <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-        <div class="fb-title">สรุปประเภทคู่ขัดแย้ง (จากผู้ที่ติ๊ก)</div>
-        <div class="agg-list" id="agg-conflict-types"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1587,8 +1585,7 @@
     const arr = (texts||[]).map(t=>String(t||'').trim()).filter(t=>t);
     if(!arr.length){ el.innerHTML = '<p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p>'; return; }
     const shown = arr.slice(-max).reverse();
-    el.innerHTML = shown.map(t=>`<div class="fb-item">${escapeHtml(t)}</div>`).join('')
-      + (arr.length > max ? `<p class="fb-more">... และอีก ${arr.length-max} รายการ</p>` : '');
+    el.innerHTML = shown.map(t=>`<div class="fb-item">${escapeHtml(t)}</div>`).join('');
   }
 
   function renderAggregations(all){
@@ -1597,14 +1594,12 @@
     const stratRank = {'1':[],'2':[],'3':[],'4':[],'5':[]};
     const devRank = {'0':[],'1':[],'2':[],'3':[]};
     const dimRank = {econ:[], social:[], env:[]};
-    const conflictTypesC = {};
     const basinOthers = [], visionComments = [], strategyAdds = [], planOthers = [], extras = [], areas = [];
     all.forEach(r=>{
       if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
       if(r.concern) concernC[r.concern] = (concernC[r.concern]||0)+1;
       (r.concerns||[]).forEach(c=>concernC[c] = (concernC[c]||0)+1);
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
-      (r.conflict_types||[]).forEach(t=>{ if(t) conflictTypesC[t] = (conflictTypesC[t]||0)+1; });
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
       if(r.strategy_status) stratStatusC[r.strategy_status] = (stratStatusC[r.strategy_status]||0)+1;
       if(r.strategy_rank) Object.entries(r.strategy_rank).forEach(([k,v])=>{ if(stratRank[k] && v) stratRank[k].push(v); });
@@ -1620,8 +1615,6 @@
     renderAggBox('agg-basin', basinC, total, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
     renderAggBox('agg-concerns', concernC, total);
     renderAggBox('agg-conflict', conflictC, total, k=>CONFLICT_LABEL[k]||k);
-    const conflictTypesTotal = Object.values(conflictTypesC).reduce((s,c)=>s+c,0);
-    renderAggBox('agg-conflict-types', conflictTypesC, conflictTypesTotal);
     renderAggBox('agg-plans', planC, total);
     renderAggBox('agg-strategy-status', stratStatusC, total, k=>STRAT_STATUS[k]||k);
     const stratMap = {}; STRATEGY_LABELS.forEach((l,i)=>stratMap[String(i+1)] = l);
