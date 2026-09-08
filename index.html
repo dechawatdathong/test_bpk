@@ -1717,8 +1717,13 @@
       // Aggregate word cloud from responses (1 response = 1 vote)
       const words = {};
       responses.forEach(r=> (r.words||[]).forEach(w=>{ if(w) words[w] = (words[w]||0)+1; }));
-      const pollDoc = await pollRef.get();
-      const pollData = pollDoc.exists ? pollDoc.data() : {votes:{}, feedback:[]};
+      // Aggregate vision votes + feedback from responses (single source of truth)
+      const visionVotes = {};
+      const visionFeedback = [];
+      responses.forEach(r=>{
+        if(r.vision) visionVotes[r.vision] = (visionVotes[r.vision]||0)+1;
+        if(r.vision_comment) visionFeedback.push(r.vision_comment);
+      });
 
       const wb = XLSX.utils.book_new();
 
@@ -1763,10 +1768,10 @@
       XLSX.utils.book_append_sheet(wb, ws2, 'เวิร์ดคลาวด์');
 
       // Sheet 3 — poll
-      const totalV = Object.values(pollData.votes||{}).reduce((s,c)=>s+c,0);
+      const totalV = Object.values(visionVotes).reduce((s,c)=>s+c,0);
       const pr = [['ตัวเลือก','จำนวน','ร้อยละ']];
       ['agree_strong','agree','improve','disagree'].forEach(k=>{
-        const c = (pollData.votes||{})[k]||0;
+        const c = visionVotes[k]||0;
         const pct = totalV ? Math.round(c/totalV*100) : 0;
         pr.push([VISION_LABEL[k], c, pct+'%']);
       });
@@ -1777,7 +1782,7 @@
 
       // Sheet 4 — feedback
       const fb = [['ข้อเสนอแนะวิสัยทัศน์']];
-      (pollData.feedback||[]).forEach(f=>fb.push([f]));
+      visionFeedback.forEach(f=>fb.push([f]));
       const ws4 = XLSX.utils.aoa_to_sheet(fb);
       ws4['!cols'] = [{wch:80}];
       XLSX.utils.book_append_sheet(wb, ws4, 'ข้อเสนอแนะ');
