@@ -1056,6 +1056,10 @@
       <div class="admin-section">
         <h2>ความขัดแย้ง (1.4)</h2>
         <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">3 อันดับคู่ขัดแย้ง · เคยเกิดขึ้นแล้ว</div>
+        <div class="agg-list" id="agg-conflict-past"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">3 อันดับคู่ขัดแย้ง · ยังไม่เกิด แต่มีแนวโน้ม</div>
+        <div class="agg-list" id="agg-conflict-potential"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1383,7 +1387,7 @@
       const k = bar.dataset.vkey;
       const c = votes[k] || 0;
       const pct = total ? Math.round(c/total*100) : 0;
-      bar.querySelector('.val').textContent = c+' · '+pct+'%';
+      bar.querySelector('.val').textContent = c+' คน คิดเป็น · '+pct+'%';
       bar.querySelector('.bar-fill').style.width = pct+'%';
     });
     document.getElementById('poll-total-count').textContent = total+' คน';
@@ -1578,6 +1582,19 @@
     }).join('');
   }
 
+  function renderTopN(id, counts, n){
+    const el = document.getElementById(id);
+    if(!el) return;
+    const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,n);
+    if(!entries.length){ el.innerHTML = '<p class="admin-empty">ยังไม่มีข้อมูล</p>'; return; }
+    const total = Object.values(counts).reduce((s,c)=>s+c,0);
+    const max = entries[0][1];
+    el.innerHTML = entries.map(([k,v],i)=>{
+      const barW = Math.round(v/max*100);
+      const pct = total ? Math.round(v/total*100) : 0;
+      return `<div class="agg-row"><span class="label"><b>อันดับที่ ${i+1}</b> ${k}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
+    }).join('');
+  }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function renderFeedbackList(id, texts, max=3){
     const el = document.getElementById(id);
@@ -1594,12 +1611,18 @@
     const stratRank = {'1':[],'2':[],'3':[],'4':[],'5':[]};
     const devRank = {'0':[],'1':[],'2':[],'3':[]};
     const dimRank = {econ:[], social:[], env:[]};
+    const conflictPastC = {}, conflictPotentialC = {};
     const basinOthers = [], visionComments = [], strategyAdds = [], planOthers = [], extras = [], areas = [];
     all.forEach(r=>{
       if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
       if(r.concern) concernC[r.concern] = (concernC[r.concern]||0)+1;
       (r.concerns||[]).forEach(c=>concernC[c] = (concernC[c]||0)+1);
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
+      if(r.conflict === 'past'){
+        (r.conflict_types||[]).forEach(t=>{ if(t) conflictPastC[t] = (conflictPastC[t]||0)+1; });
+      } else if(r.conflict === 'potential'){
+        (r.conflict_types||[]).forEach(t=>{ if(t) conflictPotentialC[t] = (conflictPotentialC[t]||0)+1; });
+      }
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
       if(r.strategy_status) stratStatusC[r.strategy_status] = (stratStatusC[r.strategy_status]||0)+1;
       if(r.strategy_rank) Object.entries(r.strategy_rank).forEach(([k,v])=>{ if(stratRank[k] && v) stratRank[k].push(v); });
@@ -1615,7 +1638,10 @@
     renderAggBox('agg-basin', basinC, total, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
     renderAggBox('agg-concerns', concernC, total);
     renderAggBox('agg-conflict', conflictC, total, k=>CONFLICT_LABEL[k]||k);
-    renderAggBox('agg-plans', planC, total);
+    renderTopN('agg-conflict-past', conflictPastC, 3);
+    renderTopN('agg-conflict-potential', conflictPotentialC, 3);
+    const planTotal = Object.values(planC).reduce((s,c)=>s+c,0);
+    renderAggBox('agg-plans', planC, planTotal);
     renderAggBox('agg-strategy-status', stratStatusC, total, k=>STRAT_STATUS[k]||k);
     const stratMap = {}; STRATEGY_LABELS.forEach((l,i)=>stratMap[String(i+1)] = l);
     renderRankAgg('agg-strategy-rank', stratRank, total, stratMap);
