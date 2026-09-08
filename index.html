@@ -613,6 +613,7 @@
   .vchart.vchart-rank{height:340px;padding:24px 20px 16px;gap:28px;}
   .vchart.vchart-rank .vchart-col{min-width:80px;max-width:110px;flex:0 1 90px;}
   .vchart.vchart-rank .vchart-bar{max-width:44px;margin:0 auto;}
+  #vchart-vision .vchart-bar, #vchart-words .vchart-bar{max-width:56px;margin:0 auto;}
   .vchart.vchart-rank .vchart-label{font-size:13px;line-height:1.4;}
   .vchart.vchart-rank .vchart-label b{color:var(--brand-dark);font-size:14px;display:block;margin-bottom:2px;}
   .admin-cloud{background:var(--brand-lighter);border-radius:var(--radius);padding:20px;min-height:120px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:10px 18px;text-align:center;}
@@ -1039,6 +1040,8 @@
       <div class="admin-section">
         <h2>จำนวนคำที่ถูกเลือก (1.2)</h2>
         <div class="vchart" id="vchart-words"><p class="admin-empty" style="margin:auto;">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">ตัวอย่างบริเวณที่ระบุ (หมู่/ตำบล/อำเภอ/จังหวัด)</div>
+        <div id="fb-area"><p class="admin-empty" style="padding:14px 0;">ยังไม่มีข้อมูล</p></div>
       </div>
       <div class="admin-section">
         <h2>เวิร์ดคลาวด์ realtime (1.2)</h2>
@@ -1053,6 +1056,8 @@
       <div class="admin-section">
         <h2>ความขัดแย้ง (1.4)</h2>
         <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">สรุปประเภทคู่ขัดแย้ง (จากผู้ที่ติ๊ก)</div>
+        <div class="agg-list" id="agg-conflict-types"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1592,18 +1597,21 @@
     const stratRank = {'1':[],'2':[],'3':[],'4':[],'5':[]};
     const devRank = {'0':[],'1':[],'2':[],'3':[]};
     const dimRank = {econ:[], social:[], env:[]};
-    const basinOthers = [], visionComments = [], strategyAdds = [], planOthers = [], extras = [];
+    const conflictTypesC = {};
+    const basinOthers = [], visionComments = [], strategyAdds = [], planOthers = [], extras = [], areas = [];
     all.forEach(r=>{
       if(r.basin) basinC[r.basin] = (basinC[r.basin]||0)+1;
       if(r.concern) concernC[r.concern] = (concernC[r.concern]||0)+1;
       (r.concerns||[]).forEach(c=>concernC[c] = (concernC[c]||0)+1);
       if(r.conflict) conflictC[r.conflict] = (conflictC[r.conflict]||0)+1;
+      (r.conflict_types||[]).forEach(t=>{ if(t) conflictTypesC[t] = (conflictTypesC[t]||0)+1; });
       (r.plans||[]).forEach(p=>planC[p] = (planC[p]||0)+1);
       if(r.strategy_status) stratStatusC[r.strategy_status] = (stratStatusC[r.strategy_status]||0)+1;
       if(r.strategy_rank) Object.entries(r.strategy_rank).forEach(([k,v])=>{ if(stratRank[k] && v) stratRank[k].push(v); });
       if(r.dev_rank) Object.entries(r.dev_rank).forEach(([k,v])=>{ if(devRank[k] && v) devRank[k].push(v); });
       if(r.dim_rank) Object.entries(r.dim_rank).forEach(([k,v])=>{ if(dimRank[k] && v) dimRank[k].push(v); });
       if(r.basin === 'OTHER' && r.basin_other) basinOthers.push(r.basin_other);
+      if(r.area) areas.push(r.area);
       if(r.vision_comment) visionComments.push(r.vision_comment);
       if(r.strategy_status === 'add' && r.strategy_add) strategyAdds.push(r.strategy_add);
       (r.plans||[]).forEach(p=>{ if(typeof p==='string' && p.startsWith('อื่นๆ:')) planOthers.push(p.replace(/^อื่นๆ:\s*/,'')); });
@@ -1612,6 +1620,8 @@
     renderAggBox('agg-basin', basinC, total, k=> k==='OTHER' ? 'อื่นๆ' : `${k} · ${BASIN_LABEL[k]||'?'}`);
     renderAggBox('agg-concerns', concernC, total);
     renderAggBox('agg-conflict', conflictC, total, k=>CONFLICT_LABEL[k]||k);
+    const conflictTypesTotal = Object.values(conflictTypesC).reduce((s,c)=>s+c,0);
+    renderAggBox('agg-conflict-types', conflictTypesC, conflictTypesTotal);
     renderAggBox('agg-plans', planC, total);
     renderAggBox('agg-strategy-status', stratStatusC, total, k=>STRAT_STATUS[k]||k);
     const stratMap = {}; STRATEGY_LABELS.forEach((l,i)=>stratMap[String(i+1)] = l);
@@ -1620,6 +1630,7 @@
     renderRankAgg('agg-dev-rank', devRank, total, devMap);
     renderRankAgg('agg-dim-rank', dimRank, total, DIM_LABELS);
     renderFeedbackList('fb-basin-other', basinOthers);
+    renderFeedbackList('fb-area', areas);
     renderFeedbackList('fb-vision', visionComments);
     renderFeedbackList('fb-strategy', strategyAdds);
     renderFeedbackList('fb-plan-other', planOthers);
