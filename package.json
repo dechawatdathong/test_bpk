@@ -1,0 +1,12 @@
+{
+  "name": "testapp",
+  "version": "1.0.0",
+  "description": "เว็บนี้ใช้ **Firebase Firestore** (ฐานข้อมูลฟรีของ Google) แทนระบบเก็บข้อมูลของ Claude เพื่อให้ทุกมือถือที่เปิดเว็บพร้อมกันเห็นผล Word Cloud และผลโหวตแบบเรียลไทม์เหมือนเดิม",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

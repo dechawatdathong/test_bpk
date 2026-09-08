@@ -1341,23 +1341,10 @@
   }
   function pickVision(el){
     const key = el.dataset.vkey;
-    const prev = localStorage.getItem('visionVoted');
-    if(prev === key){ toggleSub('vision-feedback', key==='improve'); return; }
     el.parentElement.querySelectorAll('.choice').forEach(o=>o.classList.remove('selected'));
     el.classList.add('selected');
     toggleSub('vision-feedback', key==='improve');
-    const upd = { votes: { [key]: increment(1) } };
-    if(prev) upd.votes[prev] = increment(-1);
-    pollRef.set(upd, {merge:true})
-      .then(()=>{ localStorage.setItem('visionVoted', key); })
-      .catch(e=>{
-        console.error(e); alert('โหวตไม่สำเร็จ: '+e.message);
-        el.classList.remove('selected');
-        if(prev){
-          const p = el.parentElement.querySelector(`[data-vkey="${prev}"]`);
-          if(p) p.classList.add('selected');
-        }
-      });
+    localStorage.setItem('visionVoted', key);
   }
   // Restore selection on page load
   window.addEventListener('DOMContentLoaded',()=>{
@@ -1380,14 +1367,14 @@
       if(vv === 'improve') toggleSub('vision-feedback', true);
     }
   });
-  /* -------- Vision poll display (LIVE) -------- */
-  pollRef.onSnapshot(doc=>{
-    const d = doc.exists ? doc.data() : {votes:{}, feedback:[]};
-    renderPoll(d);
+  /* -------- Vision poll display (LIVE from responses) -------- */
+  responsesRef.onSnapshot(snap=>{
+    const votes = {};
+    snap.docs.forEach(d=>{ const v = d.data().vision; if(v) votes[v] = (votes[v]||0)+1; });
+    renderPoll(votes);
   }, err=>console.error('poll err:',err));
 
-  function renderPoll(d){
-    const votes = d.votes || {};
+  function renderPoll(votes){
     const total = Object.values(votes).reduce((s,c)=>s+c,0);
     document.querySelectorAll('.poll-summary .bar').forEach(bar=>{
       const k = bar.dataset.vkey;
@@ -1468,10 +1455,6 @@
     try{
       const data = collectData();
       await responsesRef.add({...data, ts: serverTimestamp()});
-      // Vision already voted realtime on click. Only save improve feedback here.
-      if(data.vision === 'improve' && data.vision_comment){
-        await pollRef.set({ feedback: arrayUnion(data.vision_comment) }, {merge:true});
-      }
       document.getElementById('sending-overlay').classList.remove('show');
       document.getElementById('success-overlay').classList.add('show');
     }catch(e){
@@ -1503,15 +1486,14 @@
       const wFull = {};
       WORD_ORDER.forEach(k=> wFull[k] = w[k]||0);
       renderVerticalChart('vchart-words', wFull);
-    }, err=>console.error('resp err:',err));
-    pollRef.onSnapshot(doc=>{
-      const v = doc.exists ? (doc.data().votes || {}) : {};
-      document.getElementById('stat-votes').textContent = Object.values(v).reduce((s,c)=>s+c,0);
-      // Fill missing keys as 0 so bars stay in fixed order
+      // Aggregate vision votes from responses (1 response = 1 vote)
+      const vv = {};
+      all.forEach(r=>{ if(r.vision) vv[r.vision] = (vv[r.vision]||0)+1; });
+      document.getElementById('stat-votes').textContent = Object.values(vv).reduce((s,c)=>s+c,0);
       const vFull = {};
-      ['agree_strong','agree','improve','disagree'].forEach(k=>vFull[k] = v[k]||0);
+      ['agree_strong','agree','improve','disagree'].forEach(k=>vFull[k] = vv[k]||0);
       renderVerticalChart('vchart-vision', vFull, k=>VISION_LABEL[k]||k);
-    });
+    }, err=>console.error('resp err:',err));
   }
   function renderAdminCloud(words){
     const c = document.getElementById('admin-cloud');
