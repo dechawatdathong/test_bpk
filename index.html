@@ -599,6 +599,8 @@
   .agg-row .bar-mini{width:80px;height:6px;background:var(--line);border-radius:999px;overflow:hidden;}
   .agg-row .bar-mini > div{height:100%;background:var(--brand);border-radius:999px;}
   .agg-row .count{font-weight:600;color:var(--brand-dark);min-width:36px;text-align:right;}
+  .conflict-list .agg-row{border-left:5px solid transparent;background:#F5F9FB;}
+  .conflict-list .agg-row .bar-mini > div{background:currentColor;}
   .rank-agg-list{display:flex;flex-direction:column;gap:14px;}
   .rank-agg-row{padding:16px 18px;background:var(--brand-lighter);border-radius:12px;border-left:4px solid var(--brand);}
   .rank-agg-row.top1{border-left-color:var(--accent);background:linear-gradient(90deg, var(--accent-light) 0%, var(--brand-lighter) 60%);}
@@ -1056,10 +1058,10 @@
       <div class="admin-section">
         <h2>ความขัดแย้ง (1.4)</h2>
         <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-        <div class="fb-title">3 อันดับคู่ขัดแย้ง · เคยเกิดขึ้นแล้ว</div>
-        <div class="agg-list" id="agg-conflict-past"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-        <div class="fb-title">3 อันดับคู่ขัดแย้ง · ยังไม่เกิด แต่มีแนวโน้ม</div>
-        <div class="agg-list" id="agg-conflict-potential"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">คู่ขัดแย้ง · เคยเกิดขึ้นแล้ว</div>
+        <div class="agg-list conflict-list" id="agg-conflict-past"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+        <div class="fb-title">คู่ขัดแย้ง · ยังไม่เกิด แต่มีแนวโน้ม</div>
+        <div class="agg-list conflict-list" id="agg-conflict-potential"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1592,7 +1594,8 @@
     el.innerHTML = entries.map(([k,v],i)=>{
       const barW = Math.round(v/max*100);
       const pct = total ? Math.round(v/total*100) : 0;
-      return `<div class="agg-row"><span class="label"><b>อันดับที่ ${i+1}</b> ${k}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
+      const color = colorForKey(k);
+      return `<div class="agg-row" style="border-left-color:${color};color:${color};"><span class="label" style="color:var(--ink);"><b style="color:${color};">อันดับที่ ${i+1}</b> ${k}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count" style="color:${color};">${v} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
     }).join('');
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
