@@ -599,8 +599,18 @@
   .agg-row .bar-mini{width:80px;height:6px;background:var(--line);border-radius:999px;overflow:hidden;}
   .agg-row .bar-mini > div{height:100%;background:var(--brand);border-radius:999px;}
   .agg-row .count{font-weight:600;color:var(--brand-dark);min-width:36px;text-align:right;}
-  .conflict-list .agg-row{border-left:5px solid transparent;background:#F5F9FB;}
-  .conflict-list .agg-row .bar-mini > div{background:currentColor;}
+  .conflict-box.past{background:linear-gradient(135deg,#FFF4E8,#FFE9D3);border:1px solid #F5C48A;}
+  .conflict-box.past h2{color:#8B4A0F;}
+  .conflict-box.past h2:before{background:#E48A3A;box-shadow:0 0 0 5px rgba(228,138,58,.22);}
+  .conflict-box.past .agg-row{background:#FFFBF6;border-left:4px solid #E48A3A;}
+  .conflict-box.past .agg-row .count,.conflict-box.past .agg-row b{color:#B65A15;}
+  .conflict-box.past .agg-row .bar-mini > div{background:#E48A3A;}
+  .conflict-box.potential{background:linear-gradient(135deg,#EAF3EE,#D6EBE0);border:1px solid #8FC7A9;}
+  .conflict-box.potential h2{color:#1E5B3D;}
+  .conflict-box.potential h2:before{background:#2E9970;box-shadow:0 0 0 5px rgba(46,153,112,.22);}
+  .conflict-box.potential .agg-row{background:#F5FBF7;border-left:4px solid #2E9970;}
+  .conflict-box.potential .agg-row .count,.conflict-box.potential .agg-row b{color:#1E7A52;}
+  .conflict-box.potential .agg-row .bar-mini > div{background:#2E9970;}
   .rank-agg-list{display:flex;flex-direction:column;gap:14px;}
   .rank-agg-row{padding:16px 18px;background:var(--brand-lighter);border-radius:12px;border-left:4px solid var(--brand);}
   .rank-agg-row.top1{border-left-color:var(--accent);background:linear-gradient(90deg, var(--accent-light) 0%, var(--brand-lighter) 60%);}
@@ -1058,10 +1068,16 @@
       <div class="admin-section">
         <h2>ความขัดแย้ง (1.4)</h2>
         <div class="agg-list" id="agg-conflict"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-        <div class="fb-title">คู่ขัดแย้ง · เคยเกิดขึ้นแล้ว</div>
-        <div class="agg-list conflict-list" id="agg-conflict-past"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
-        <div class="fb-title">คู่ขัดแย้ง · ยังไม่เกิด แต่มีแนวโน้ม</div>
-        <div class="agg-list conflict-list" id="agg-conflict-potential"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section conflict-box past">
+        <h2>คู่ขัดแย้ง · เคยเกิดขึ้นแล้ว</h2>
+        <div class="agg-list" id="agg-conflict-past"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
+      </div>
+
+      <div class="admin-section conflict-box potential">
+        <h2>คู่ขัดแย้ง · ยังไม่เกิด แต่มีแนวโน้ม</h2>
+        <div class="agg-list" id="agg-conflict-potential"><p class="admin-empty">ยังไม่มีข้อมูล</p></div>
       </div>
 
       <div class="admin-section">
@@ -1594,8 +1610,7 @@
     el.innerHTML = entries.map(([k,v],i)=>{
       const barW = Math.round(v/max*100);
       const pct = total ? Math.round(v/total*100) : 0;
-      const color = colorForKey(k);
-      return `<div class="agg-row" style="border-left-color:${color};color:${color};"><span class="label" style="color:var(--ink);"><b style="color:${color};">อันดับที่ ${i+1}</b> ${k}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count" style="color:${color};">${v} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
+      return `<div class="agg-row"><span class="label"><b>อันดับที่ ${i+1}</b> ${k}</span><div class="bar-mini"><div style="width:${barW}%"></div></div><span class="count">${v} คน คิดเป็นร้อยละ ${pct}%</span></div>`;
     }).join('');
   }
   function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
